@@ -22,18 +22,17 @@ let payeeName = Bot.getProperty("admin_payee_name") || "Video Bot";
 let text =
   "📱 *Dynamic UPI ID & QR Configuration*\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "Current UPI ID: `" + upiId + "`\n" +
-  "Current Payee Name: *" + payeeName + "*\n\n" +
+  "🆔 *Current UPI ID:* `" + upiId + "`\n" +
+  "👤 *Current Payee Name:* *" + payeeName + "*\n\n" +
   "📌 *How it works:*\n" +
   "Whenever any user clicks *Buy Points*, the bot creates a dynamic QR code pre-filled with this UPI ID and the package amount. When you change this UPI ID, all new payment QRs will immediately use the updated ID!\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
   "Select an option to update:";
 
 let buttons = [
-  [{ title: "✏️ Change UPI ID", command: "/admin_save_upi upi_id" }],
-  [{ title: "✏️ Change Payee Name", command: "/admin_save_upi payee_name" }],
+  [{ title: "✏️ Change UPI ID", command: "/admin_change_upi" }],
+  [{ title: "✏️ Change Payee Name", command: "/admin_change_payee" }],
   [{ title: "🔙 Admin Dashboard", command: "/admin" }]
 ];
 
 Bot.sendInlineKeyboard(buttons, text);
-

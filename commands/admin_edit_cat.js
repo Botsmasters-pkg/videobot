@@ -10,10 +10,19 @@ aliases:
 group: 
 CMD*/
 
+let primaryAdmin = 8710308658;
+if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) {
+  Bot.sendMessage("🚫 *Access Denied.*");
+  return;
+}
+
 let categories = Bot.getProperty("categories") || [];
 if (categories.length === 0) {
-  let buttons = [[{ title: "🔙 Admin Menu", command: "/admin" }]];
-  Bot.sendInlineKeyboard(buttons, "⚠️ No categories exist yet.");
+  let buttons = [
+    [{ title: "➕ Add New Category", command: "/admin_add_cat" }],
+    [{ title: "🔙 Admin Dashboard", command: "/admin" }]
+  ];
+  Bot.sendInlineKeyboard(buttons, "📂 *Manage Categories*\n\n_No custom categories have been created yet._\n(Categories are optional — you can upload and stream videos directly without creating any category).");
   return;
 }
 
@@ -26,7 +35,9 @@ for (let i = 0; i < categories.length; i++) {
   }]);
 }
 
-buttons.push([{ title: "🔙 Back to Admin", command: "/admin" }]);
+buttons.push([
+  { title: "➕ Add Category", command: "/admin_add_cat" },
+  { title: "🔙 Admin Dashboard", command: "/admin" }
+]);
 
-Bot.sendInlineKeyboard(buttons, "✏️ *Select a Category to Edit or Delete:*");
-
+Bot.sendInlineKeyboard(buttons, "📂 *Manage Categories (Total: " + categories.length + ")*\n\nTap any category to view details or delete:");

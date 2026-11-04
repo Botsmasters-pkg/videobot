@@ -62,21 +62,22 @@ let upi = Bot.getProperty("admin_upi_id") || "paytmqr2810050501011@paytm";
 let forceStatus = Bot.getProperty("force_channels_enabled") !== false ? "🟢 Enabled" : "🔴 Disabled";
 
 let text =
-  "⚙️ *System Default Settings & Region Configuration*\n" +
+  "⚙️ *Bot System Default Settings & Region Configuration*\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "Here are the recommended standard default configurations:\n\n" +
+  "This feature provides a 1-click restore/setup for all standard bot parameters for the **INR (₹ - Indian UPI Region)**:\n\n" +
+  "• 🇮🇳 *Region Currency:* Indian Rupee (INR - ₹)\n" +
   "• 💬 *Support Admin Username:* `@" + helpUser.replace("@", "") + "` (Default: `@CODEVEXA`)\n" +
   "• 🎁 *Referral Reward:* `" + refPts + " Points` (Default: `10 Points`)\n" +
   "• 🎬 *Video Access Cost:* `" + vidPts + " Points` (Default: `5 Points`)\n" +
-  "• 🆓 *Free Videos:* `First 2 Videos Free for new users`\n" +
+  "• 🆓 *Free Videos:* `First 2 Videos Free for all users`\n" +
   "• 📱 *UPI ID:* `" + upi + "`\n" +
   "• 🏷 *Base Pricing:* `₹10 = 100 Points`\n" +
   "• 📢 *Force Channels:* `" + forceStatus + "`\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "Tap below to apply and save these default settings:";
+  "Whenever you want to apply or restore these standard defaults, tap below:";
 
 let buttons = [
-  [{ title: "🔄 Apply / Reset Default Settings", command: "/admin_default_settings apply" }],
+  [{ title: "🔄 Apply All Default Settings", command: "/admin_default_settings apply" }],
   [{ title: "🔙 Back to Admin Dashboard", command: "/admin" }]
 ];
 

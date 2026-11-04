@@ -1,6 +1,6 @@
 /*CMD
 command: /admin_bulk_upload
-help: Step 1 of Bulk Video Upload - Pick Category
+help: Bulk Video Upload - Directly Start Uploading Multiple Videos
 need_reply: false
 auto_retry_time: 
 folder: 
@@ -16,36 +16,23 @@ if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) 
   return;
 }
 
-let categories = Bot.getProperty("categories") || [];
-if (categories.length === 0) {
-  let buttons = [[{ title: "🔙 Admin Menu", command: "/admin" }]];
-  Bot.sendInlineKeyboard(buttons, "⚠️ No categories exist yet! Please add a category first via *Add Category*.");
-  return;
-}
+User.setProperty("admin_bulk_mode", true, "boolean");
+User.setProperty("admin_bulk_cat_id", null, "integer");
+User.setProperty("admin_bulk_uploaded", 0, "integer");
+User.setProperty("admin_bulk_failed", 0, "integer");
 
-let buttons = [];
-let row = [];
-
-for (let i = 0; i < categories.length; i++) {
-  let cat = categories[i];
-  row.push({
-    title: (cat.emoji || "📁") + " " + cat.name,
-    command: "/admin_bulk_start " + cat.id
-  });
-  if (row.length === 2) {
-    buttons.push(row);
-    row = [];
-  }
-}
-if (row.length > 0) {
-  buttons.push(row);
-}
-
-buttons.push([{ title: "❌ Cancel & Return", command: "/admin" }]);
+let buttons = [
+  [{ title: "🏁 Finish Bulk Upload", command: "/admin_bulk_finish" }],
+  [{ title: "❌ Cancel & Return", command: "/admin" }]
+];
 
 let text =
-  "📦 *Bulk Video Upload — Select Target Category*\n\n" +
-  "Choose which category will receive the bulk video uploads:";
+  "📦 *Bulk Video Upload Mode Active!*\n" +
+  "━━━━━━━━━━━━━━━━━━━━━\n" +
+  "👉 Send or forward multiple **MP4 or MOV videos** into this chat (one by one or select multiple and forward).\n\n" +
+  "• Titles are automatically extracted from your captions or filenames.\n" +
+  "• Duplicate videos are automatically skipped.\n" +
+  "• Each video will be saved directly into your video library.\n\n" +
+  "Tap **🏁 Finish Bulk Upload** below when you are done! 👇";
 
 Bot.sendInlineKeyboard(buttons, text);
-

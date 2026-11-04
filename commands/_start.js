@@ -44,14 +44,10 @@ if (!isRegistered) {
   let totalUsers = Bot.getProperty("total_users_count") || 0;
   Bot.setProperty("total_users_count", totalUsers + 1, "integer");
 
-  // Initialize seed categories if brand new bot
-  let categories = Bot.getProperty("categories");
-  if (!categories || categories.length === 0) {
-    Bot.setProperty("categories", [
-      { id: 1, name: "Action & Thriller", emoji: "💥" },
-      { id: 2, name: "Comedy & Fails", emoji: "😂" },
-      { id: 3, name: "Trailers & Clips", emoji: "🎬" }
-    ], "json");
+  // Clear any old hardcoded seed categories
+  let existingCats = Bot.getProperty("categories");
+  if (existingCats && existingCats.length === 3 && existingCats[0].name === "Action & Thriller") {
+    Bot.setProperty("categories", [], "json");
   }
 
   // Handle Referral

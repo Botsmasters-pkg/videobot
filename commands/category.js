@@ -1,6 +1,6 @@
 /*CMD
 command: /category
-help: Instantly streams a random video from the selected category with free/points verification
+help: Instantly streams a random video with free/points verification
 need_reply: false
 auto_retry_time: 
 folder: 
@@ -11,12 +11,8 @@ group:
 CMD*/
 
 let parts = params ? params.trim().split(" ") : [];
-let catId = parseInt(parts[0]);
-
-if (!catId) {
-  Bot.runCommand("/categories");
-  return;
-}
+let isAll = (!parts[0] || parts[0] === "all");
+let catId = isAll ? null : parseInt(parts[0]);
 
 // 1. Balance and Free Video Verification
 let isAdmin = (user.telegramid == 8710308658 || user.telegramid == "8710308658");
@@ -62,31 +58,33 @@ if (!isAdmin && !isFreeVideo && userPoints < videoCost) {
   return;
 }
 
-// 2. Fetch Category
+// 2. Fetch Category info if specific category requested
 let categories = Bot.getProperty("categories") || [];
-let cat = null;
-for (let i = 0; i < categories.length; i++) {
-  if (categories[i].id === catId) {
-    cat = categories[i];
-    break;
+let catName = "Video Library";
+let catEmoji = "🎬";
+
+if (catId) {
+  for (let i = 0; i < categories.length; i++) {
+    if (categories[i].id === catId) {
+      catName = categories[i].name;
+      catEmoji = categories[i].emoji || "📁";
+      break;
+    }
   }
 }
 
-if (!cat) {
-  Bot.sendMessage("⚠️ Category not found.");
-  Bot.runCommand("/categories");
-  return;
-}
-
-let catEmoji = cat.emoji || "📁";
-
-// 3. Fetch and filter videos in this category
+// 3. Fetch and filter videos
 let allVideos = Bot.getProperty("videos") || [];
 let catVideos = [];
-for (let i = 0; i < allVideos.length; i++) {
-  if (allVideos[i].category_id === catId) {
-    catVideos.push(allVideos[i]);
+
+if (catId) {
+  for (let i = 0; i < allVideos.length; i++) {
+    if (allVideos[i].category_id === catId) {
+      catVideos.push(allVideos[i]);
+    }
   }
+} else {
+  catVideos = allVideos;
 }
 
 let playableVideos = [];
@@ -103,7 +101,7 @@ if (playableVideos.length === 0) {
   ];
   Bot.sendInlineKeyboard(
     buttons,
-    catEmoji + " *" + cat.name + "*\n\nNo playable videos in this category yet. Please check back soon!"
+    catEmoji + " *" + catName + "*\n\nNo video has been uploaded yet. Please check back soon!"
   );
   return;
 }
@@ -130,7 +128,7 @@ if (isAdmin) {
   history.push({
     type: "spent",
     amount: videoCost,
-    reason: "Watched video in " + cat.name,
+    reason: "Watched video (" + catName + ")",
     date: new Date().toISOString()
   });
   User.setProperty("points_history", history, "json");
@@ -177,15 +175,17 @@ let descPart = selectedVid.description ? "\n\n📝 _" + selectedVid.description 
 let caption =
   "🎬 *" + selectedVid.title + "*\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "📂 *Category:* " + catEmoji + " " + cat.name + "\n" +
+  "📂 *Category:* " + catEmoji + " " + catName + "\n" +
   accessInfoText +
   descPart + "\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
   "✨ _Enjoy watching!_";
 
+let nextCommand = catId ? "/category " + catId : "/category all";
+
 let inlineKeyboard = [
   [
-    { text: "▶️ Next Video", callback_data: "/category " + cat.id }
+    { text: "▶️ Next Video", callback_data: nextCommand }
   ],
   [
     { text: "🎬 Watch Videos", callback_data: "/categories" },

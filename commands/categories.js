@@ -16,31 +16,40 @@ let userPoints = Bot.getProperty("points_" + user.telegramid) || User.getPropert
 let videoCost = Bot.getProperty("points_per_video") || 5;
 
 let categories = Bot.getProperty("categories") || [];
-
-if (categories.length === 0) {
-  let buttons = [[{ title: "🔙 Back to Main Menu", command: "/start" }]];
-  Bot.sendInlineKeyboard(
-    buttons,
-    "🎬 *Watch Videos*\n\nCurrently, there are no categories available. Please check back soon!"
-  );
-  return;
-}
+let videos = Bot.getProperty("videos") || [];
 
 let buttons = [];
-let row = [];
 
-for (let i = 0; i < categories.length; i++) {
-  let cat = categories[i];
-  let btnTitle = (cat.emoji || "📁") + " " + cat.name;
-
-  row.push({ title: btnTitle, command: "/category " + cat.id });
-  if (row.length === 2) {
-    buttons.push(row);
-    row = [];
+if (categories.length === 0) {
+  if (videos.length === 0) {
+    let emptyButtons = [[{ title: "🔙 Back to Main Menu", command: "/start" }]];
+    Bot.sendInlineKeyboard(
+      emptyButtons,
+      "🎬 *Watch Videos*\n\nNo video has been uploaded yet. Please check back soon!"
+    );
+    return;
   }
-}
-if (row.length > 0) {
-  buttons.push(row);
+
+  // Videos exist without categories - directly show watch button!
+  buttons.push([{ title: "▶️ Watch Videos Now (" + videos.length + " Available)", command: "/category all" }]);
+} else {
+  let row = [];
+  for (let i = 0; i < categories.length; i++) {
+    let cat = categories[i];
+    let btnTitle = (cat.emoji || "📁") + " " + cat.name;
+
+    row.push({ title: btnTitle, command: "/category " + cat.id });
+    if (row.length === 2) {
+      buttons.push(row);
+      row = [];
+    }
+  }
+  if (row.length > 0) {
+    buttons.push(row);
+  }
+
+  // Also offer all videos
+  buttons.push([{ title: "🎬 Watch All Videos (" + videos.length + ")", command: "/category all" }]);
 }
 
 // Low balance or buy options
@@ -67,10 +76,10 @@ if (isAdmin) {
 }
 
 let msg =
-  "🎬 *Video Library Categories*\n" +
+  "🎬 *Video Library*\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
   statusText +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "Select a category below to stream videos instantly 👇";
+  "Tap an option below to stream videos instantly 👇";
 
 Bot.sendInlineKeyboard(buttons, msg);
