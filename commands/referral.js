@@ -1,75 +1,55 @@
 /*CMD
 command: /referral
-help: Advanced Referral Dashboard (1 Refer = 1 Video)
+help: Refer & Earn Dashboard
 need_reply: false
 auto_retry_time: 
 folder: 
 answer: 
 keyboard: 
-aliases: 
+aliases: /refer_earn
 group: 
 CMD*/
 
 let validReferrals = Bot.getProperty("ref_count_" + user.telegramid) || 0;
-let rewardsClaimed = User.getProperty("rewards_claimed") || 0;
-let currentBalance = Math.max(0, validReferrals - rewardsClaimed);
-
-// Tier badge
-let tier = "🥉 Bronze Member";
-if (validReferrals >= 10) {
-  tier = "🥇 Gold Champion";
-} else if (validReferrals >= 4) {
-  tier = "🥈 Silver VIP";
-}
+let refPointsEarned = Bot.getProperty("ref_points_" + user.telegramid) || 0;
+let userPoints = Bot.getProperty("points_" + user.telegramid) || User.getProperty("points") || 0;
 
 let botUsername = bot.name || "SmartVideoBot";
 let refLink = "https://t.me/" + botUsername + "?start=ref_" + user.telegramid;
 
-let isEnabled = Bot.getProperty("referral_enabled");
-let statusBadge = (isEnabled !== false) ? "🟢 Active" : "🔴 Paused by Admin";
+let pointsPerRef = Bot.getProperty("points_per_referral") || 10;
+let pointsPerVid = Bot.getProperty("points_per_video") || 5;
 
 let text =
-  "🎁 *Referral Rewards Dashboard*\n" +
+  "🎁 *Refer & Earn Dashboard*\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "🏅 *Your Rank:* " + tier + "\n" +
   "👥 *Total Successful Referrals:* *" + validReferrals + "*\n" +
-  "🎬 *Videos Watched:* *" + rewardsClaimed + "*\n" +
-  "💰 *Available Video Balance:* *" + currentBalance + " Video(s)*\n\n" +
+  "💎 *Total Referral Points Earned:* *" + refPointsEarned + " Points*\n" +
+  "💰 *Current Balance:* *" + userPoints + " Points*\n\n" +
   "📜 *Reward Rules:*\n" +
-  "• *1 Referral* = *1 Video Access*\n" +
-  "• No limits! Har friend ke judne par 1 video balance add hoga!\n" +
-  "⚡ *Program Status:* " + statusBadge + "\n\n" +
+  "• *1 Referral* = *" + pointsPerRef + " Points* automatically added to your balance!\n" +
+  "• *1 Video Stream* = *" + pointsPerVid + " Points* (1 friend = 2 videos free!)\n" +
+  "• Every new friend you invite also gets *2 Free Videos*!\n" +
+  "• No limits! Share more to earn unlimited points.\n\n" +
   "🔗 *Your Exclusive Referral Link:*\n" +
   "`" + refLink + "`\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "_Tip: Tap the link above to copy it automatically._";
+  "_Tip: Tap the link above to copy it instantly._";
 
-let buttons = [];
-
-if (currentBalance > 0) {
-  buttons.push([
-    {
-      title: "🎬 Watch Videos Now (" + currentBalance + " Available)",
-      command: "/categories"
-    }
-  ]);
-}
-
-let shareText = "🎬 Join this Telegram Video Bot to watch amazing videos! Tap the link below:";
+let shareText = "🎬 Watch exclusive videos on this bot! First 2 videos are completely FREE! Join using my link:";
 let shareUrl =
   "https://t.me/share/url?url=" +
   encodeURIComponent(refLink) +
   "&text=" +
   encodeURIComponent(shareText);
 
-buttons.push([
-  { title: "📤 Share Referral Link", url: shareUrl },
-  { title: "🏆 Leaderboard", command: "/leaderboard" }
-]);
-
-buttons.push([
-  { title: "🔄 Refresh Stats", command: "/referral" },
-  { title: "🔙 Back to Main Menu", command: "/start" }
-]);
+let buttons = [
+  [{ title: "📤 Share Referral Link", url: shareUrl }],
+  [
+    { title: "💰 My Points", command: "/my_points" },
+    { title: "🎬 Watch Videos", command: "/categories" }
+  ],
+  [{ title: "🏠 Main Menu", command: "/start" }]
+];
 
 Bot.sendInlineKeyboard(buttons, text);

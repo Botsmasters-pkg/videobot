@@ -4,35 +4,66 @@ A production-ready Telegram Video Bot built specifically for **[Bots.Business](h
 
 ---
 
-## 🌟 Key Features
+## 🌟 Key Features Overview
 
-### 👤 1. User Panel
-- **🎬 Watch Videos:** When a user taps a category, the bot immediately streams a random video from that category in the built-in Telegram video player (`supports_streaming: true`).
-- **▶️ Next Video:** Users can tap *Next Video* under the player to watch the next random video.
-- **Hidden Counts:** Video counts are hidden from the user interface for a clean, premium look.
-- **🌟 Daily Bonus:** Free daily surprise reward video every 24 hours.
-- **👤 My Account & 📊 Statistics:** Track watch history, referrals, and live available video balance.
+### 👤 1. Normal User Panel
+- **🎬 Watch Videos:** Streams native video in Telegram video player (`supports_streaming: true`).
+- **🎁 Free Video System:** Every new user gets their **first 2 videos completely FREE** (0 points deducted).
+- **💰 3rd Video Onwards:** Video access requires **5 Points per video** (Admin configurable).
+- **⚡ No Limits:** No daily limits and no daily resets. Users can watch as many videos as their points allow.
+- **💰 My Points Dashboard (`/my_points`):** Live points balance, free videos used (X/2), total points earned/spent, and real-time transaction history.
+- **🎁 Refer & Earn (`/referral`):** Personal referral link with instant 1-click Telegram share button. Earns **10 Points per referral**!
+- **💳 Buy Points (`/buy_points`):** Dynamic UPI QR code generator starting at **₹10 = 100 Points**.
+- **ℹ️ Help Center (`/help`):** Dynamic admin contact link and guide.
 
-### 🎁 2. Referral Reward System (1 Refer = 1 Video Balance)
-- **Formula:** **1 Referral = 1 Video Access**!
-- **Strict Balance Enforcement:**
-  - If a user has `0 Balance`, clicking to watch a video displays `⚠️ Not Enough Balance!` along with their referral link and direct share buttons.
-  - When user refers a friend, 1 video credit is added to their balance immediately.
-  - Watching a video deducts 1 credit.
-- **Interactive Dashboard:** Live balance counter, rank badges (🥉 Bronze, 🥈 Silver, 🥇 Gold), and instant share links.
-- **Anti-Cheat:** Blocks self-referrals and duplicate accounts.
+---
 
-### 🛠 3. Admin Panel (Exclusive Admin: `8710308658`)
-- **📤 Upload Video:**
-  - Direct MP4/MOV video upload & forwarding.
-  - All videos stream natively in Telegram video player with play/pause, scrub, and fullscreen.
-  - ZIP guidance: Instructs admin to extract archives on PC/phone and upload MP4 videos directly so Telegram streams them smoothly.
-- **📂 Add & Manage Categories:** Create, edit, and delete categories with custom emojis.
-- **📋 Video Catalog:** Manage, preview, and delete uploaded videos.
-- **📢 Broadcast:** Send announcements to all registered users.
-- **🚫 User Management:** Ban/unban users by numeric Telegram ID.
-- **📊 Advanced Analytics:** Real-time metrics, views counter, and user growth.
-- **👑 Admin Bypass:** Admin `8710308658` has unlimited video streaming without any referral or balance requirement.
+### 🎁 2. Referral & Points Reward System
+- **Formula:** 
+  - **1 Successful Referral = 10 Points** (Default)
+  - **1 Video Access = 5 Points** (Default)
+  - That means **1 Friend Invited = 2 Full Video Streams**!
+- **Anti-Cheat Security:**
+  - Self-referrals strictly blocked.
+  - Duplicate accounts prevented.
+  - Only genuine first-time users award points to their referrer.
+- **Instant Referral Notifications:** Referrers receive an immediate Telegram message whenever a friend joins through their link.
+
+---
+
+### 💳 3. Dynamic UPI QR Payment System
+- **Packages:**
+  - ₹10 = 100 Points
+  - ₹20 = 200 Points
+  - ₹50 = 500 Points
+  - ₹100 = 1000 Points
+- **Dynamic QR Code:**
+  - Prefilled with Admin's current UPI ID and exact package amount.
+  - Compatible with Google Pay, PhonePe, Paytm, and BHIM.
+- **Screenshot Verification:**
+  - User uploads payment screenshot directly in chat.
+  - Status set to `pending` with unique Order ID.
+  - Admin receives immediate notification with photo and 1-tap `[ ✅ Approve ]` and `[ ❌ Reject ]` buttons.
+  - On approval, points are credited automatically to user's balance without manual math.
+
+---
+
+### 📢 4. Force Channel Verification (3 Types)
+1. **Public Channel:** Verification via Channel Username (`@channelname`).
+2. **Private Channel:** Verification via Channel Chat ID (`-100...`) and Private Invite Link.
+3. **Private Request Channel:** User sends Join Request; pending join request is verified valid immediately without waiting for admin approval.
+
+---
+
+### 🛠 5. Master Administrator Panel (`8710308658`)
+- **Single & Bulk Video Upload:** Direct MP4/MOV upload with batch processing and duplicate detection.
+- **Points Management:** Adjust points per referral, video cost, add/deduct points from any user by ID.
+- **Payment Management:** Review pending screenshot submissions, approve or reject with custom reason.
+- **UPI & QR Configuration:** Change UPI ID and Payee Name anytime.
+- **Pricing Management:** Add, edit, or delete coin pricing packages.
+- **Force Channel Settings:** Add, remove, and toggle Public, Private, and Request channels.
+- **Help Username Settings:** Change support contact username on the fly.
+- **Admin Bypass:** Master Admin `8710308658` enjoys unlimited video streaming with 0 points deducted.
 
 ---
 
@@ -46,9 +77,3 @@ A production-ready Telegram Video Bot built specifically for **[Bots.Business](h
    ```
 4. Click **"Import from Git"** or **"Sync"**.
 5. All commands in `commands/` and `bot.json` are automatically loaded into your bot!
-
----
-
-## 👑 Admin Verification
-The bot is strictly configured for administrator ID **`8710308658`**.
-When starting the bot from that Telegram account, the **🛠 Open Admin Panel** button appears automatically, or you can send `/admin`.

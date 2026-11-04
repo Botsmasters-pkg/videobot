@@ -1,6 +1,6 @@
 /*CMD
 command: /admin
-help: Administrative Control Dashboard
+help: Administrative Control Dashboard with Full Modular Controls
 need_reply: false
 auto_retry_time: 
 folder: 
@@ -10,7 +10,6 @@ aliases:
 group: 
 CMD*/
 
-// Strictly enforce Admin ID 8710308658
 let primaryAdmin = 8710308658;
 Bot.setProperty("admin_ids", [primaryAdmin], "json");
 
@@ -19,33 +18,64 @@ if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) 
   return;
 }
 
+// Fetch live metrics
+let videos = Bot.getProperty("videos") || [];
+let totalUsers = Bot.getProperty("total_users_count") || 0;
+let payments = Bot.getProperty("payment_requests") || [];
+let pendingPayments = 0;
+for (let i = 0; i < payments.length; i++) {
+  if (payments[i].status === "pending") {
+    pendingPayments++;
+  }
+}
+
+let paymentBadge = pendingPayments > 0 ? " (" + pendingPayments + " Pending!)" : "";
+
 let buttons = [
   [
-    { title: "📤 Upload Video", command: "/admin_upload" },
-    { title: "📂 Add Category", command: "/admin_add_cat" }
+    { title: "📤 Single Video Upload", command: "/admin_upload" },
+    { title: "📦 Bulk Video Upload", command: "/admin_bulk_upload" }
   ],
   [
-    { title: "📋 Manage Videos", command: "/admin_manage_vids" },
-    { title: "✏️ Edit Category", command: "/admin_edit_cat" }
+    { title: "📋 Manage Videos (" + videos.length + ")", command: "/admin_manage_vids" },
+    { title: "📂 Manage Categories", command: "/admin_edit_cat" }
   ],
   [
-    { title: "👥 All Users", command: "/admin_users" },
-    { title: "📊 Bot Statistics", command: "/admin_stats" }
+    { title: "💳 Payments" + paymentBadge, command: "/admin_payments" },
+    { title: "📱 UPI & QR Settings", command: "/admin_upi_settings" }
+  ],
+  [
+    { title: "🏷 Pricing Packages", command: "/admin_pricing" },
+    { title: "💰 Points Management", command: "/admin_points_menu" }
+  ],
+  [
+    { title: "🎬 Video Cost Points", command: "/admin_set_vid_points" },
+    { title: "🎁 Referral Settings", command: "/admin_ref_settings" }
+  ],
+  [
+    { title: "📢 Force Channels", command: "/admin_channels" },
+    { title: "💬 Help Username Settings", command: "/admin_help_settings" }
+  ],
+  [
+    { title: "🔍 User Points Lookup", command: "/admin_view_user_points" },
+    { title: "📊 Global Statistics", command: "/admin_stats" }
   ],
   [
     { title: "📢 Broadcast Message", command: "/admin_broadcast" },
     { title: "🚫 Ban/Unban User", command: "/admin_ban" }
   ],
   [
-    { title: "🎁 Referral Settings", command: "/admin_ref_settings" },
-    { title: "🔙 User Panel", command: "/start" }
+    { title: "🔙 Back to User Panel", command: "/start" }
   ]
 ];
 
 let text =
-  "🛠 *Smart Video Bot — Admin Dashboard*\n" +
+  "🛠 *Smart Video Bot — Master Admin Dashboard*\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "Welcome Administrator! Select a management module below 👇";
+  "👑 *Master Admin:* `" + primaryAdmin + "`\n" +
+  "👥 *Total Users:* " + totalUsers + " | 🎬 *Videos:* " + videos.length + "\n" +
+  "💳 *Pending Payments:* *" + pendingPayments + "*\n" +
+  "━━━━━━━━━━━━━━━━━━━━━\n" +
+  "Welcome Administrator! Select any management module below 👇";
 
 Bot.sendInlineKeyboard(buttons, text);
-

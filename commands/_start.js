@@ -11,7 +11,7 @@ group:
 CMD*/
 
 // 1. Check if user is banned
-let isBanned = User.getProperty("is_banned");
+let isBanned = Bot.getProperty("banned_" + user.telegramid);
 if (isBanned) {
   Bot.sendMessage("🚫 *Access Denied*\n\nYour account has been suspended by administrators.");
   return;
@@ -21,9 +21,14 @@ if (isBanned) {
 let isRegistered = User.getProperty("is_registered");
 if (!isRegistered) {
   User.setProperty("is_registered", true, "boolean");
-  User.setProperty("rewards_claimed", 0, "integer");
+  User.setProperty("points", 0, "integer");
+  User.setProperty("free_videos_used", 0, "integer");
+  User.setProperty("total_points_earned", 0, "integer");
+  User.setProperty("total_points_spent", 0, "integer");
+  User.setProperty("points_history", [], "json");
   User.setProperty("watched_videos", [], "json");
   User.setProperty("joined_at", new Date().toISOString(), "string");
+  Bot.setProperty("points_" + user.telegramid, 0, "integer");
 
   // Track global user list
   let allUsers = Bot.getProperty("all_users_list") || [];
@@ -58,10 +63,20 @@ if (!isRegistered) {
     if (refId && refId != user.telegramid) {
       let refEnabled = Bot.getProperty("referral_enabled");
       if (refEnabled !== false) {
+        let refPoints = Bot.getProperty("points_per_referral") || 10;
+
         // Increment referrer count
         let refCount = Bot.getProperty("ref_count_" + refId) || 0;
         let newCount = refCount + 1;
         Bot.setProperty("ref_count_" + refId, newCount, "integer");
+
+        // Credit points to referrer
+        let referrerPoints = Bot.getProperty("points_" + refId) || 0;
+        let newReferrerPoints = referrerPoints + refPoints;
+        Bot.setProperty("points_" + refId, newReferrerPoints, "integer");
+
+        let refPointsEarned = Bot.getProperty("ref_points_" + refId) || 0;
+        Bot.setProperty("ref_points_" + refId, refPointsEarned + refPoints, "integer");
 
         // Save referral history
         let refList = Bot.getProperty("ref_list_" + refId) || [];
@@ -76,20 +91,22 @@ if (!isRegistered) {
         // Save referrer on user
         User.setProperty("referrer_id", refId, "string");
 
-        // Global referral count
+        // Global stats
         let totalValid = Bot.getProperty("total_valid_referrals") || 0;
         Bot.setProperty("total_valid_referrals", totalValid + 1, "integer");
 
-        // Notify referrer (1 referral = 1 video balance)
-        let req = Bot.getProperty("referrals_per_reward") || 1;
+        let totalDist = Bot.getProperty("total_points_distributed") || 0;
+        Bot.setProperty("total_points_distributed", totalDist + refPoints, "integer");
 
+        // Notify referrer
         try {
           Bot.sendMessageToChatWithId(
             refId,
             "🎉 *New Referral Joined!*\n\n" +
             "User *" + (user.first_name || "Friend") + "* joined using your link!\n" +
             "• Total Referrals: *" + newCount + "*\n\n" +
-            "🎁 *+1 Video Balance Credited!* Tap /categories to watch a video!"
+            "🎁 *+" + refPoints + " Points Credited!* (Your Balance: *" + newReferrerPoints + " Points*)\n\n" +
+            "Tap /my_points to view your balance or /categories to watch videos!"
           );
         } catch (e) {
           // If referrer chat unreachable
@@ -105,13 +122,11 @@ let buttons = [
     { title: "🎬 Watch Videos", command: "/categories" }
   ],
   [
-    { title: "🌟 Daily Bonus", command: "/daily_bonus" }
+    { title: "💰 My Points", command: "/my_points" },
+    { title: "🎁 Refer & Earn", command: "/referral" }
   ],
   [
-    { title: "🎁 Referral Rewards", command: "/referral" },
-    { title: "👤 My Account", command: "/account" }
-  ],
-  [
+    { title: "💳 Buy Points", command: "/buy_points" },
     { title: "ℹ️ Help", command: "/help" }
   ]
 ];
@@ -121,14 +136,22 @@ if (user.telegramid == 8710308658 || user.telegramid == "8710308658") {
   buttons.push([{ title: "🛠 Open Admin Panel", command: "/admin" }]);
 }
 
+let freeUsed = User.getProperty("free_videos_used") || 0;
+let freeLeft = Math.max(0, 2 - freeUsed);
+let userPoints = Bot.getProperty("points_" + user.telegramid) || User.getProperty("points") || 0;
+
 let welcomeText =
   "👋 *Welcome, " + (user.first_name || "Friend") + "!*\n\n" +
-  "🎬 *Smart Video Reward Bot*\n\n" +
-  "📌 *What you can do:*\n" +
-  "• 🎬 *Watch Videos:* Choose a category to stream videos (1 referral = 1 video).\n" +
-  "• 🌟 *Daily Bonus:* Claim a free surprise video every 24 hours!\n" +
-  "• 🎁 *Referral Rewards:* Invite friends & earn *1 video per 1 referral*!\n" +
-  "• 📊 *Track Stats:* Monitor your views, referrals, and rewards.\n\n" +
+  "🎬 *Smart Video Bot Dashboard*\n" +
+  "━━━━━━━━━━━━━━━━━━━━━\n" +
+  "🎁 *Free Videos Left:* *" + freeLeft + " of 2 Free Videos*\n" +
+  "💰 *My Points Balance:* *" + userPoints + " Points*\n" +
+  "━━━━━━━━━━━━━━━━━━━━━\n" +
+  "📌 *How it works:*\n" +
+  "• 🎁 *First 2 Videos FREE:* No points needed for your first 2 videos!\n" +
+  "• 🎬 *After 2 Videos:* Only *5 Points* per video.\n" +
+  "• 👥 *Refer & Earn:* Invite friends to get *10 Points per referral*!\n" +
+  "• 💳 *Buy Points:* Instant UPI starting at *₹10 = 100 Points*.\n\n" +
   "Select an option below to get started 👇";
 
 Bot.sendInlineKeyboard(buttons, welcomeText);

@@ -1,6 +1,6 @@
 /*CMD
 command: /help
-help: Bot Help & Guidelines
+help: Bot Help & Guidelines with Dynamic Admin Contact
 need_reply: false
 auto_retry_time: 
 folder: 
@@ -10,31 +10,40 @@ aliases:
 group: 
 CMD*/
 
-let req = Bot.getProperty("referrals_per_reward") || 2;
+let helpAdmin = Bot.getProperty("help_admin_username") || "Botsmasters_support";
+let cleanUsername = helpAdmin.replace("@", "").trim();
+let contactUrl = "https://t.me/" + cleanUsername;
+
+let videoCost = Bot.getProperty("points_per_video") || 5;
+let refReward = Bot.getProperty("points_per_referral") || 10;
 
 let helpText =
-  "ℹ️ *Bot Help & Guidelines*\n" +
+  "ℹ️ *Bot Help & Support Center*\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "*1. How to Watch Videos:*\n" +
-  "Tap *📂 Browse Categories* or *🎬 Watch Videos* from the main menu, pick a category, and choose any video to stream it directly in Telegram.\n\n" +
-  "*2. How to Earn Free Video Rewards:*\n" +
-  "• Open *🎁 Referral Rewards* and copy your personal link.\n" +
-  "• Share your link with friends or channels.\n" +
-  "• For every *" + req + " genuine new users* who join via your link, you unlock *1 free exclusive video reward*!\n" +
-  "• The rewards are *unlimited*: " + (req * 2) + " referrals = 2 videos, " + (req * 3) + " referrals = 3 videos, etc.\n\n" +
-  "*3. Rules & Fair Play:*\n" +
-  "• Self-referrals and duplicate accounts are strictly blocked.\n" +
-  "• Fake accounts will result in account suspension.\n\n" +
-  "*4. Need Assistance?*\n" +
-  "If you encounter any issues or want to report a broken video, contact an administrator.";
+  "🎬 *1. How Video Access Works:*\n" +
+  "• 🎁 *First 2 Videos Free:* Every new user receives the first 2 videos completely free! No points are deducted.\n" +
+  "• 🎬 *3rd Video Onwards:* Each video requires *" + videoCost + " Points* to stream.\n" +
+  "• ⚡ *No Daily Limits:* You can watch as many videos as you want as long as you have points balance!\n\n" +
+  "🎁 *2. How to Earn Free Points:*\n" +
+  "• Invite your friends using your unique referral link from *🎁 Refer & Earn*.\n" +
+  "• Each successful friend who joins gives you *" + refReward + " Points* automatically!\n" +
+  "• That means 1 friend = 2 video accesses!\n\n" +
+  "💳 *3. How to Buy Points:*\n" +
+  "• Tap *💳 Buy Points* to view packages.\n" +
+  "• Scan the instant UPI QR code with GPay/PhonePe/Paytm.\n" +
+  "• Upload your payment screenshot for instant admin approval.\n\n" +
+  "━━━━━━━━━━━━━━━━━━━━━\n" +
+  "👨‍💻 *Admin Support Contact:*\n" +
+  "Need help, want to report an issue, or have questions?\n" +
+  "Directly contact our Admin: [@" + cleanUsername + "](" + contactUrl + ")";
 
 let buttons = [
+  [{ title: "💬 Contact Admin (@" + cleanUsername + ")", url: contactUrl }],
   [
-    { title: "🎬 Start Watching", command: "/categories" },
-    { title: "🎁 Referral Program", command: "/referral" }
+    { title: "🎬 Watch Videos", command: "/categories" },
+    { title: "🎁 Refer & Earn", command: "/referral" }
   ],
-  [{ title: "🔙 Back to Main Menu", command: "/start" }]
+  [{ title: "🏠 Main Menu", command: "/start" }]
 ];
 
 Bot.sendInlineKeyboard(buttons, helpText);
-

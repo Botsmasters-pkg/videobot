@@ -1,6 +1,6 @@
 /*CMD
 command: /category
-help: Instantly streams a random video from the selected category if user has balance
+help: Instantly streams a random video from the selected category with free/points verification
 need_reply: false
 auto_retry_time: 
 folder: 
@@ -18,16 +18,18 @@ if (!catId) {
   return;
 }
 
-// 1. Balance and Access Verification (1 Refer = 1 Video)
+// 1. Balance and Free Video Verification
 let isAdmin = (user.telegramid == 8710308658 || user.telegramid == "8710308658");
-let validReferrals = Bot.getProperty("ref_count_" + user.telegramid) || 0;
-let rewardsClaimed = User.getProperty("rewards_claimed") || 0;
-let currentBalance = validReferrals - rewardsClaimed;
+let freeUsed = User.getProperty("free_videos_used") || 0;
+let userPoints = Bot.getProperty("points_" + user.telegramid) || User.getProperty("points") || 0;
+let videoCost = Bot.getProperty("points_per_video") || 5;
 
-if (!isAdmin && currentBalance <= 0) {
+let isFreeVideo = (!isAdmin && freeUsed < 2);
+
+if (!isAdmin && !isFreeVideo && userPoints < videoCost) {
   let botUsername = bot.name || "SmartVideoBot";
   let refLink = "https://t.me/" + botUsername + "?start=ref_" + user.telegramid;
-  let shareText = "🎬 Watch amazing videos on this bot! Tap the link below to join:";
+  let shareText = "🎬 Watch amazing videos on this bot! First 2 videos are completely FREE! Join using my link:";
   let shareUrl =
     "https://t.me/share/url?url=" +
     encodeURIComponent(refLink) +
@@ -35,26 +37,26 @@ if (!isAdmin && currentBalance <= 0) {
     encodeURIComponent(shareText);
 
   let buttons = [
-    [{ title: "📤 Share Referral Link", url: shareUrl }],
-    [{ title: "🎁 Referral Dashboard", command: "/referral" }],
+    [{ title: "💳 Buy Points (Starting ₹10)", command: "/buy_points" }],
+    [{ title: "📤 Share Referral Link (+10 pts)", url: shareUrl }],
+    [
+      { title: "🎁 Refer & Earn", command: "/referral" },
+      { title: "💰 My Points", command: "/my_points" }
+    ],
     [{ title: "🏠 Main Menu", command: "/start" }]
   ];
 
   let text =
-    "⚠️ *Not Enough Balance!*\n" +
+    "⚠️ *Insufficient Points!*\n" +
     "━━━━━━━━━━━━━━━━━━━━━\n" +
-    "Aapke paas video dekhne ke liye balance nahi hai!\n\n" +
-    "📌 *Balance Rule:*\n" +
-    "• *1 Referral = 1 Video*\n" +
-    "• Total Referrals: *" + validReferrals + "*\n" +
-    "• Videos Watched: *" + rewardsClaimed + "*\n" +
-    "• Available Balance: *0 Videos*\n\n" +
-    "🎁 *Balance Kaise Paye?*\n" +
-    "Apne doston ko invite karein! Har *1 refer* par aapko *1 video* dekhne ko milegi.\n\n" +
-    "🔗 *Aapka Referral Link:*\n" +
-    "`" + refLink + "`\n" +
-    "━━━━━━━━━━━━━━━━━━━━━\n" +
-    "_Tip: Niche diye gaye button se doston ko share karein!_";
+    "Aapne apne *2 Free Videos* use kar liye hain!\n" +
+    "Aage ke videos dekhne ke liye *" + videoCost + " Points* ki zaroorat hai.\n\n" +
+    "💎 *Aapka Current Balance:* *" + userPoints + " Points*\n" +
+    "🎯 *Zaroorat:* *" + videoCost + " Points*\n\n" +
+    "🎁 *Points Kaise Kamaye?*\n" +
+    "• *Refer Karein:* Har 1 dost ko invite karne par *" + (Bot.getProperty("points_per_referral") || 10) + " Points* milenge!\n" +
+    "• *Points Kharidein:* Instant UPI QR se Points khareed sakte hain (₹10 = 100 Points).\n\n" +
+    "Niche diye gaye options se Points hasil karein 👇";
 
   Bot.sendInlineKeyboard(buttons, text);
   return;
@@ -87,9 +89,7 @@ for (let i = 0; i < allVideos.length; i++) {
   }
 }
 
-// Filter out zip archives so we never send zip document cards
 let playableVideos = [];
-let hasZipOnly = false;
 for (let i = 0; i < catVideos.length; i++) {
   if (!catVideos[i].is_zip) {
     playableVideos.push(catVideos[i]);
@@ -101,27 +101,41 @@ if (playableVideos.length === 0) {
     [{ title: "🎬 Watch Videos", command: "/categories" }],
     [{ title: "🏠 Main Menu", command: "/start" }]
   ];
-
-  if (catVideos.length > 0) {
-    // Only ZIP archives were uploaded
-    Bot.sendInlineKeyboard(
-      buttons,
-      catEmoji + " *" + cat.name + "*\n\n" +
-      "⚠️ *Format Notice:* Content in this category was uploaded as a .ZIP archive. Telegram cannot stream ZIP files in its native video player.\n\n" +
-      "🛠 *Admin:* Go to `/admin` -> Manage Videos, remove the ZIP entry, and upload/forward the extracted MP4 video file!"
-    );
-  } else {
-    Bot.sendInlineKeyboard(
-      buttons,
-      catEmoji + " *" + cat.name + "*\n\nNo videos have been uploaded to this category yet. Check back soon!"
-    );
-  }
+  Bot.sendInlineKeyboard(
+    buttons,
+    catEmoji + " *" + cat.name + "*\n\nNo playable videos in this category yet. Please check back soon!"
+  );
   return;
 }
 
-// 4. Deduct 1 referral balance if not admin
-if (!isAdmin) {
-  User.setProperty("rewards_claimed", rewardsClaimed + 1, "integer");
+// 4. Deduct Points or Update Free Video Count
+let accessInfoText = "";
+
+if (isAdmin) {
+  accessInfoText = "👑 *Admin Access:* Unlimited";
+} else if (isFreeVideo) {
+  let newFreeUsed = freeUsed + 1;
+  User.setProperty("free_videos_used", newFreeUsed, "integer");
+  accessInfoText = "🎁 *Complimentary Video:* " + newFreeUsed + " of 2 Free Used (0 points deducted)";
+} else {
+  let newPoints = userPoints - videoCost;
+  User.setProperty("points", newPoints, "integer");
+  Bot.setProperty("points_" + user.telegramid, newPoints, "integer");
+
+  let totalSpent = (User.getProperty("total_points_spent") || 0) + videoCost;
+  User.setProperty("total_points_spent", totalSpent, "integer");
+
+  // Save transaction history
+  let history = User.getProperty("points_history") || [];
+  history.push({
+    type: "spent",
+    amount: videoCost,
+    reason: "Watched video in " + cat.name,
+    date: new Date().toISOString()
+  });
+  User.setProperty("points_history", history, "json");
+
+  accessInfoText = "💎 *Points Balance:* " + newPoints + " Points (-" + videoCost + " pts)";
 }
 
 // 5. Pick unwatched or random playable video
@@ -149,7 +163,7 @@ Bot.setProperty("videos", allVideos, "json");
 let totalViews = Bot.getProperty("total_views_count") || 0;
 Bot.setProperty("total_views_count", totalViews + 1, "integer");
 
-// Record on user
+// Record watch on user profile
 if (watched.indexOf(selectedVid.id) === -1) {
   watched.push(selectedVid.id);
   User.setProperty("watched_videos", watched, "json");
@@ -158,15 +172,13 @@ if (watched.indexOf(selectedVid.id) === -1) {
 let userWatchedCount = User.getProperty("user_watched_count") || 0;
 User.setProperty("user_watched_count", userWatchedCount + 1, "integer");
 
-// 6. Build Caption and Interactive Controls
-let newBalance = isAdmin ? "Unlimited (Admin)" : Math.max(0, currentBalance - 1);
+// Caption & Controls
 let descPart = selectedVid.description ? "\n\n📝 _" + selectedVid.description + "_" : "";
-
 let caption =
   "🎬 *" + selectedVid.title + "*\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
   "📂 *Category:* " + catEmoji + " " + cat.name + "\n" +
-  "💳 *Video Balance:* " + newBalance + (isAdmin ? "" : " Video(s)") +
+  accessInfoText +
   descPart + "\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
   "✨ _Enjoy watching!_";
@@ -181,7 +193,6 @@ let inlineKeyboard = [
   ]
 ];
 
-// Always stream as native Telegram video (never as document / zip)
 Api.sendVideo({
   chat_id: chat.chatid,
   video: selectedVid.file_id,

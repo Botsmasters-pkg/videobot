@@ -15,13 +15,13 @@ let buttons = [
     { title: "🎬 Watch Videos", command: "/categories" }
   ],
   [
-    { title: "🎁 Referral Rewards", command: "/referral" },
-    { title: "👤 My Account", command: "/account" }
+    { title: "💰 My Points", command: "/my_points" },
+    { title: "🎁 Refer & Earn", command: "/referral" }
   ],
   [
+    { title: "💳 Buy Points", command: "/buy_points" },
     { title: "ℹ️ Help", command: "/help" }
   ]
 ];
 
 Bot.sendInlineKeyboard(buttons, "👋 Tap an option below to browse videos or manage your account:");
-

@@ -10,25 +10,32 @@ aliases:
 group: 
 CMD*/
 
-let req = Bot.getProperty("referrals_per_reward") || 1;
+let primaryAdmin = 8710308658;
+if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) {
+  Bot.sendMessage("🚫 *Access Denied.*");
+  return;
+}
+
+let refPoints = Bot.getProperty("points_per_referral") || 10;
 let isEnabled = Bot.getProperty("referral_enabled");
 let statusStr = (isEnabled !== false) ? "🟢 Enabled (Active)" : "🔴 Disabled (Paused)";
+let totalRefs = Bot.getProperty("total_valid_referrals") || 0;
 
 let text =
-  "🎁 *Referral Rewards Configuration*\n" +
+  "🎁 *Referral Program Configuration*\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
   "⚙️ *Current Status:* " + statusStr + "\n" +
-  "🎯 *Requirement:* *" + req + "* referral(s) per 1 video reward\n" +
-  "🏆 *Reward Type:* Random Video Streaming\n" +
+  "💎 *Reward per Referral:* *" + refPoints + " Points*\n" +
+  "📈 *Total Successful Referrals:* *" + totalRefs + "*\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
   "Modify settings using the buttons below:";
 
-let toggleBtnText = (isEnabled !== false) ? "🔴 Disable Referral Program" : "🟢 Enable Referral Program";
+let toggleBtnText = (isEnabled !== false) ? "🔴 Pause Referral Program" : "🟢 Activate Referral Program";
 
 let buttons = [
   [{ title: toggleBtnText, command: "/admin_toggle_ref" }],
-  [{ title: "✏️ Change Requirement (" + req + " ref/video)", command: "/admin_set_ref_req" }],
-  [{ title: "🏆 View Leaderboard", command: "/leaderboard" }],
+  [{ title: "✏️ Change Referral Points (" + refPoints + " pts)", command: "/admin_set_ref_points" }],
+  [{ title: "📊 Points & Referral Statistics", command: "/admin_points_stats" }],
   [{ title: "🔙 Back to Admin", command: "/admin" }]
 ];
 
