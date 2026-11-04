@@ -1,6 +1,6 @@
 /*CMD
 command: /admin_add_req_chan
-help: Prompt admin for private request channel details
+help: Step 1 of 2 - Prompt admin for Request Channel Chat ID
 need_reply: false
 auto_retry_time: 
 folder: 
@@ -18,13 +18,13 @@ if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) 
 
 let buttons = [[{ title: "🔙 Cancel & Return", command: "/admin_channels" }]];
 
-Bot.sendInlineKeyboard(
-  buttons,
-  "📩 *Add Private Request Channel*\n\n" +
-  "Enter the *Channel Chat ID* and *Join Request Invite Link* separated by a space:\n\n" +
-  "Format: `-1001234567890 https://t.me/+JoinRequestLink`\n\n" +
-  "📌 *Rule:* When users click the link and submit a Join Request, they are considered verified immediately without waiting for admin approval!"
-);
+let text =
+  "📩 *Add Private Request Channel — Step 1 of 2*\n" +
+  "━━━━━━━━━━━━━━━━━━━━━\n" +
+  "👉 Enter the **Channel Chat ID** (usually starts with `-100`, e.g. `-1001234567890`):\n\n" +
+  "⚠️ *Important:* Make sure this bot is added as an **Administrator** in your channel!\n" +
+  "━━━━━━━━━━━━━━━━━━━━━\n" +
+  "_(Send /admin to cancel)_";
 
-Bot.run({ command: "/admin_save_req_chan" });
-
+Bot.sendInlineKeyboard(buttons, text);
+Bot.run({ command: "/admin_got_req_id" });

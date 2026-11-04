@@ -218,4 +218,84 @@ if (user) {
       }
     }
   }
+
+  // 6. Force Channel Membership Enforcement
+  if (!isAdmin) {
+    let isGlobalChannelsEnabled = Bot.getProperty("force_channels_enabled");
+    if (isGlobalChannelsEnabled !== false) {
+      let channels = Bot.getProperty("force_channels") || [];
+      let activeChannels = [];
+      for (let i = 0; i < channels.length; i++) {
+        if (channels[i].enabled !== false) {
+          activeChannels.push(channels[i]);
+        }
+      }
+
+      if (activeChannels.length > 0) {
+        let isVerified = User.getProperty("channels_verified");
+        if (!isVerified) {
+          // Identify incoming command / callback
+          let currentCmd = "";
+          if (typeof message === "string") {
+            currentCmd = message.trim();
+          } else if (request && request.callback_query && request.callback_query.data) {
+            currentCmd = request.callback_query.data.trim();
+          } else if (request && request.message && request.message.text) {
+            currentCmd = request.message.text.trim();
+          }
+
+          // Preserve referral parameters if user started via referral link
+          if (currentCmd.indexOf("/start") === 0) {
+            let refParam = currentCmd.replace("/start", "").trim();
+            if (refParam) {
+              User.setProperty("pending_ref_param", refParam, "string");
+            }
+          }
+
+          // Allow channel verification commands to execute
+          let isVerifyCmd = false;
+          let allowedPrefixes = ["/check_channels", "/on_verify_member", "/on_verify_fail", "/verify_req_channel"];
+          for (let p = 0; p < allowedPrefixes.length; p++) {
+            if (currentCmd.indexOf(allowedPrefixes[p]) === 0) {
+              isVerifyCmd = true;
+              break;
+            }
+          }
+
+          if (!isVerifyCmd) {
+            let buttons = [];
+            for (let i = 0; i < activeChannels.length; i++) {
+              let ch = activeChannels[i];
+              let title = ch.title || (ch.username ? ch.username : "Channel #" + (i + 1));
+              let link = ch.invite_link || (ch.username ? "https://t.me/" + ch.username.replace("@", "") : "");
+              if (link) {
+                buttons.push([{ title: "📢 Join " + title, url: link }]);
+              }
+            }
+            buttons.push([{ title: "🔄 Verify Membership", command: "/check_channels 0" }]);
+
+            let joinText =
+              "⚠️ *Membership Required to Access Bot!*\n" +
+              "━━━━━━━━━━━━━━━━━━━━━\n" +
+              "To use this bot and access all video content, you must join our official channels below:\n\n";
+
+            for (let i = 0; i < activeChannels.length; i++) {
+              let ch = activeChannels[i];
+              let cType = ch.type ? ch.type.toUpperCase() : "PUBLIC";
+              let cName = ch.title || ch.username || ("Channel #" + (i + 1));
+              joinText += (i + 1) + ". *" + cName + "* (" + cType + ")\n";
+            }
+
+            joinText +=
+              "\n👉 *Step 1:* Click each channel link above to join.\n" +
+              "👉 *Step 2:* Tap *🔄 Verify Membership* below once you've joined.\n" +
+              "━━━━━━━━━━━━━━━━━━━━━";
+
+            Bot.sendInlineKeyboard(buttons, joinText);
+            return false;
+          }
+        }
+      }
+    }
+  }
 }

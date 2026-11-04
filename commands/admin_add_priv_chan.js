@@ -1,6 +1,6 @@
 /*CMD
 command: /admin_add_priv_chan
-help: Prompt admin for private channel details
+help: Step 1 of 2 - Prompt admin for Private Channel Chat ID
 need_reply: false
 auto_retry_time: 
 folder: 
@@ -18,13 +18,13 @@ if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) 
 
 let buttons = [[{ title: "🔙 Cancel & Return", command: "/admin_channels" }]];
 
-Bot.sendInlineKeyboard(
-  buttons,
-  "🔒 *Add Private Channel*\n\n" +
-  "Enter the *Channel Chat ID* and *Private Invite Link* separated by a space:\n\n" +
-  "Format: `-1001234567890 https://t.me/+AbCdEfGh`\n\n" +
-  "⚠️ *Note:* The bot must be an **Administrator** in this private channel to verify members!"
-);
+let text =
+  "🔒 *Add Private Channel — Step 1 of 2*\n" +
+  "━━━━━━━━━━━━━━━━━━━━━\n" +
+  "👉 Enter the **Channel Chat ID** (usually starts with `-100`, e.g. `-1001234567890`):\n\n" +
+  "⚠️ *Important:* Make sure this bot is added as an **Administrator** in your channel so it can verify user memberships!\n" +
+  "━━━━━━━━━━━━━━━━━━━━━\n" +
+  "_(Send /admin to cancel)_";
 
-Bot.run({ command: "/admin_save_priv_chan" });
-
+Bot.sendInlineKeyboard(buttons, text);
+Bot.run({ command: "/admin_got_priv_id" });
