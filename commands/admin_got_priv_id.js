@@ -39,3 +39,4 @@ let text =
 
 Bot.sendInlineKeyboard(buttons, text);
 Bot.run({ command: "/admin_got_priv_link" });
+

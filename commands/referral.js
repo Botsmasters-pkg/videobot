@@ -47,7 +47,7 @@ let buttons = [
   [{ title: "📤 Share Referral Link", url: shareUrl }],
   [
     { title: "💰 My Points", command: "/my_points" },
-    { title: "🎬 Watch Videos", command: "/categories" }
+    { title: "🎬 Get Video", command: "/get_video" }
   ],
   [{ title: "🏠 Main Menu", command: "/start" }]
 ];

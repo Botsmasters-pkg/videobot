@@ -55,7 +55,7 @@ try {
     "🎁 *Bonus Points Added by Administrator!*\n\n" +
     "• Points Added: *+" + pointsToAdd + " Points*\n" +
     "• Current Balance: *" + newPts + " Points*\n\n" +
-    "Tap /categories to start watching videos!"
+    "Tap /my_points to view your balance or /get_video to watch videos!"
   );
 } catch (e) {
   // If user chat unreachable

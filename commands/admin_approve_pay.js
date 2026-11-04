@@ -85,7 +85,7 @@ try {
     "Tap below to browse and stream videos now 👇";
 
   let userButtons = [
-    [{ title: "🎬 Watch Videos Now", command: "/categories" }],
+    [{ title: "🎬 Get Video", command: "/get_video" }],
     [{ title: "💰 My Points", command: "/my_points" }]
   ];
   Bot.sendInlineKeyboardToChatWithId(pay.user_id, userButtons, userNotice);

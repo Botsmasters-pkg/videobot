@@ -58,36 +58,23 @@ if (index >= activeChannels.length) {
 let ch = activeChannels[index];
 
 if (ch.type === "request") {
-  // Check if join request is recorded
-  let hasRequested = User.getProperty("requested_channel_" + ch.chat_id) || Bot.getProperty("user_pending_req_" + user.telegramid + "_" + ch.chat_id);
-  if (hasRequested) {
-    // Request is valid! Move to next channel
+  // Check if join request is recorded as pending in bot's memory
+  let rawChatId = (ch.chat_id || "").toString();
+  let numId = rawChatId.replace("-100", "").replace("-", "");
+  let hasPendingReq =
+    Bot.getProperty("user_pending_req_" + user.telegramid + "_" + rawChatId) ||
+    Bot.getProperty("user_pending_req_" + user.telegramid + "_" + rawChatId.replace("-100", "-")) ||
+    (numId && Bot.getProperty("user_pending_req_" + user.telegramid + "_" + numId)) ||
+    Bot.getProperty("user_pending_req_" + user.telegramid);
+
+  if (hasPendingReq) {
+    // Join request is already pending and verified! Move to next channel
     Bot.runCommand("/check_channels " + (index + 1));
     return;
   }
-
-  // Prompt user to send request
-  let reqLink = ch.invite_link || "https://t.me/";
-  let buttons = [
-    [{ title: "📩 Send Join Request (Channel " + (index + 1) + ")", url: reqLink }],
-    [{ title: "✅ I Have Sent Request", command: "/verify_req_channel " + ch.chat_id + " " + index }],
-    [{ title: "🔄 Verify Membership", command: "/check_channels " + index }]
-  ];
-
-  let text =
-    "📢 *Channel Join Request Required!*\n" +
-    "━━━━━━━━━━━━━━━━━━━━━\n" +
-    "Channel " + (index + 1) + " of " + activeChannels.length + " requires a **Join Request**:\n\n" +
-    "1. Tap **Send Join Request** below and request to join.\n" +
-    "2. Once you tap request, click **I Have Sent Request**.\n\n" +
-    "📌 *Notice:* You do NOT have to wait for admin approval! Pending requests are verified immediately.\n" +
-    "━━━━━━━━━━━━━━━━━━━━━";
-
-  Bot.sendInlineKeyboard(buttons, text);
-  return;
 }
 
-// Public or Private Channel Check via Telegram getChatMember
+// Check membership via Telegram getChatMember
 let targetChat = ch.chat_id || ch.username;
 if (!targetChat) {
   Bot.runCommand("/check_channels " + (index + 1));

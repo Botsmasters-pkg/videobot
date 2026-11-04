@@ -102,7 +102,7 @@ if (!isRegistered) {
             "User *" + (user.first_name || "Friend") + "* joined using your link!\n" +
             "• Total Referrals: *" + newCount + "*\n\n" +
             "🎁 *+" + refPoints + " Points Credited!* (Your Balance: *" + newReferrerPoints + " Points*)\n\n" +
-            "Tap /my_points to view your balance or /categories to watch videos!"
+            "Tap /my_points to view your balance or /get_video to watch videos!"
           );
         } catch (e) {
           // If referrer chat unreachable
@@ -115,7 +115,7 @@ if (!isRegistered) {
 // 3. Render Main Menu with Buttons
 let buttons = [
   [
-    { title: "🎬 Watch Videos", command: "/categories" }
+    { title: "🎬 Get Video", command: "/get_video" }
   ],
   [
     { title: "💰 My Points", command: "/my_points" },
@@ -144,10 +144,10 @@ let welcomeText =
   "💰 *My Points Balance:* *" + userPoints + " Points*\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
   "📌 *How it works:*\n" +
-  "• 🎁 *First 2 Videos FREE:* No points needed for your first 2 videos!\n" +
+  "• 🎁 *First 2 Videos FREE:* Tap 'Get Video' to watch 2 free videos!\n" +
   "• 🎬 *After 2 Videos:* Only *5 Points* per video.\n" +
   "• 👥 *Refer & Earn:* Invite friends to get *10 Points per referral*!\n" +
   "• 💳 *Buy Points:* Instant UPI starting at *₹10 = 100 Points*.\n\n" +
-  "Select an option below to get started 👇";
+  "Tap *🎬 Get Video* below to get your video 👇";
 
 Bot.sendInlineKeyboard(buttons, welcomeText);

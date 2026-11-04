@@ -53,7 +53,7 @@ let buttons = [
     { title: "💳 Buy Points", command: "/buy_points" }
   ],
   [
-    { title: "🎬 Watch Videos", command: "/categories" },
+    { title: "🎬 Get Video", command: "/get_video" },
     { title: "🔄 Refresh", command: "/my_points" }
   ],
   [{ title: "🏠 Main Menu", command: "/start" }]

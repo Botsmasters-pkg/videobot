@@ -66,3 +66,4 @@ Bot.sendInlineKeyboard(
   "• 🔗 *Invite Link:* " + link + "\n\n" +
   "Users will now be required to join this channel before using the bot."
 );
+

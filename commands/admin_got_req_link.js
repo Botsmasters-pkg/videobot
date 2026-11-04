@@ -66,3 +66,4 @@ Bot.sendInlineKeyboard(
   "• 🔗 *Request Link:* " + link + "\n\n" +
   "Users sending a Join Request to this channel will be verified immediately."
 );
+
