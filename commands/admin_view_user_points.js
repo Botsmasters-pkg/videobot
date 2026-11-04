@@ -24,3 +24,4 @@ Bot.sendInlineKeyboard(
 );
 
 Bot.run({ command: "/admin_show_user_points" });
+

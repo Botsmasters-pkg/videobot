@@ -4,7 +4,7 @@ help: Receives new admin username input
 need_reply: true
 auto_retry_time: 
 folder: 
-answer: ✏️ *Change Help Admin Username*\n\nEnter the new Telegram username (with or without @, e.g. `MySupportAdmin`):
+answer: ✏️ *Change Help Contact Admin Username*\n\nEnter the new Telegram username (with or without @, e.g. `CODEVEXA`):
 keyboard: 
 aliases: 
 group: 
@@ -16,7 +16,14 @@ if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) 
   return;
 }
 
-let newUsername = (message || "").trim().replace("@", "");
+let newUsername = "";
+
+if (params && params === "default") {
+  newUsername = "CODEVEXA";
+} else {
+  newUsername = (message || "").trim().replace("@", "");
+}
+
 if (!newUsername || newUsername.length < 3) {
   Bot.sendMessage("⚠️ Invalid username. Please send a valid Telegram username (at least 3 characters):");
   Bot.run({ command: "/admin_set_help_input" });
@@ -32,5 +39,5 @@ let buttons = [
 
 Bot.sendInlineKeyboard(
   buttons,
-  "✅ *Help Username Updated Successfully!*\n\nNew Admin Username: *@" + newUsername + "*\nClickable URL: https://t.me/" + newUsername
+  "✅ *Admin Contact Username Updated Successfully!*\n\nNew Admin Username: *@" + newUsername + "*\nClickable URL: https://t.me/" + newUsername
 );

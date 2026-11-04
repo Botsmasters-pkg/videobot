@@ -21,46 +21,36 @@ let statusBadge = (isGlobalEnabled !== false) ? "🟢 Active (Enforced)" : "🔴
 
 let channels = Bot.getProperty("force_channels") || [];
 
-let channelLines = [];
-let buttons = [];
-
-if (channels.length === 0) {
-  channelLines.push("_No force channels added yet._");
-} else {
-  for (let i = 0; i < channels.length; i++) {
-    let ch = channels[i];
-    let typeIcon = ch.type === "public" ? "📢 Public" : (ch.type === "private" ? "🔒 Private" : "📩 Request");
-    let detail = ch.username ? ch.username : (ch.chat_id || "N/A");
-    channelLines.push((i + 1) + ". *" + typeIcon + "*: `" + detail + "`");
-    buttons.push([{
-      title: "🗑 Remove Channel " + (i + 1) + " (" + typeIcon + ")",
-      command: "/admin_del_chan " + ch.id
-    }]);
-  }
-}
-
 let text =
-  "📢 *Force Channel Management*\n" +
+  "📢 *Force Channel Management Dashboard*\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
   "⚙️ *Global System Status:* " + statusBadge + "\n" +
-  "Total Channels: *" + channels.length + "*\n\n" +
-  "📋 *Configured Channels:*\n" +
-  channelLines.join("\n") +
-  "\n━━━━━━━━━━━━━━━━━━━━━\n" +
-  "Add channels or toggle system below:";
+  "📊 *Total Added Channels:* *" + channels.length + "*\n\n" +
+  "📌 *Supported Channel Types:*\n" +
+  "1. 📢 *Public Channel:* Verified via `@channelusername`\n" +
+  "2. 🔒 *Private Channel:* Verified via Chat ID (`-100...`) & Invite Link\n" +
+  "3. 📩 *Private Request Channel:* Verified immediately upon Join Request sent\n" +
+  "━━━━━━━━━━━━━━━━━━━━━\n" +
+  "Select a management option below 👇";
 
-let toggleBtn = (isGlobalEnabled !== false) ? "🔴 Disable Force Channels" : "🟢 Enable Force Channels";
+let toggleBtn = (isGlobalEnabled !== false) ? "🔴 Disable System" : "🟢 Enable System";
 
-buttons.push([
-  { title: "📢 Add Public Channel", command: "/admin_add_pub_chan" }
-]);
-buttons.push([
-  { title: "🔒 Add Private Channel", command: "/admin_add_priv_chan" },
-  { title: "📩 Add Request Channel", command: "/admin_add_req_chan" }
-]);
-buttons.push([
-  { title: toggleBtn, command: "/admin_toggle_chan all" },
-  { title: "🛠 Admin Dashboard", command: "/admin" }
-]);
+let buttons = [
+  [
+    { title: "📋 List Channels (" + channels.length + ")", command: "/admin_list_channels" },
+    { title: "🗑 Remove Channel", command: "/admin_remove_channel" }
+  ],
+  [
+    { title: "📢 Add Public Channel", command: "/admin_add_pub_chan" },
+    { title: "🔒 Add Private Channel", command: "/admin_add_priv_chan" }
+  ],
+  [
+    { title: "📩 Add Request Channel", command: "/admin_add_req_chan" },
+    { title: toggleBtn, command: "/admin_toggle_chan all" }
+  ],
+  [
+    { title: "🛠 Admin Dashboard", command: "/admin" }
+  ]
+];
 
 Bot.sendInlineKeyboard(buttons, text);

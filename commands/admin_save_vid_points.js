@@ -34,3 +34,4 @@ Bot.sendInlineKeyboard(
   buttons,
   "✅ *Video Access Cost Updated Successfully!*\n\nNew Cost: *" + newCost + " Points per video access*"
 );
+

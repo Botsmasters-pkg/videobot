@@ -110,3 +110,4 @@ text +=
   "👉 Tap each button above to join or send request, then tap *Verify Membership*!";
 
 Bot.sendInlineKeyboard(buttons, text);
+

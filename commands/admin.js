@@ -65,6 +65,7 @@ let buttons = [
     { title: "🚫 Ban/Unban User", command: "/admin_ban" }
   ],
   [
+    { title: "⚙️ Default Settings / Region", command: "/admin_default_settings" },
     { title: "🔙 Back to User Panel", command: "/start" }
   ]
 ];

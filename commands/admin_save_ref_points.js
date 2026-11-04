@@ -34,3 +34,4 @@ Bot.sendInlineKeyboard(
   buttons,
   "✅ *Referral Points Updated Successfully!*\n\nNew Reward: *" + newPoints + " Points per successful referral*"
 );
+

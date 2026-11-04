@@ -162,14 +162,14 @@ if (user) {
 
         // Send confirmation to User
         let userConfirmText =
-          "✅ *Your Payment Screenshot Has Been Submitted Successfully. Please Wait For Admin Approval.*\n\n" +
+          "Your payment screenshot has been submitted successfully!\n\n" +
+          "Please wait while our admin verifies your payment.\n\n" +
+          "Your payment will be verified within 2 hours. Once approved, your purchased points will be automatically added to your account.\n\n" +
+          "Thank you for your patience!\n\n" +
           "━━━━━━━━━━━━━━━━━━━━━\n" +
           "🧾 *Order ID:* `" + newPayment.order_id + "`\n" +
           "💰 *Amount Paid:* *₹" + newPayment.amount + "*\n" +
-          "🎁 *Requested Points:* *" + newPayment.points + " Points*\n" +
-          "⏱ *Status:* 🟡 *Pending Verification*\n" +
-          "━━━━━━━━━━━━━━━━━━━━━\n" +
-          "You will receive an instant notification once the admin approves your payment!";
+          "🎁 *Purchased Points:* *" + newPayment.points + " Points*";
 
         let userButtons = [
           [{ title: "💰 My Points", command: "/my_points" }],

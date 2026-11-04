@@ -107,3 +107,4 @@ Bot.sendInlineKeyboard(
   "🎁 Points Credited: *" + pay.points + " Points*\n" +
   "💎 User New Total: *" + newPoints + " Points*"
 );
+

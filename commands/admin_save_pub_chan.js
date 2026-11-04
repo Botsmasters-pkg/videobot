@@ -47,3 +47,4 @@ Bot.sendInlineKeyboard(
   buttons,
   "✅ *Public Channel Added Successfully!*\n\nChannel: *" + username + "*\nLink: https://t.me/" + username.replace("@", "")
 );
+

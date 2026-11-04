@@ -18,3 +18,4 @@ if (chatId) {
 }
 
 Bot.runCommand("/check_channels");
+

@@ -1,6 +1,6 @@
 /*CMD
 command: /admin_help_settings
-help: Configure dynamic Help contact admin username
+help: Configure dynamic Help contact admin username (Default: CODEVEXA)
 need_reply: false
 auto_retry_time: 
 folder: 
@@ -16,19 +16,22 @@ if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) 
   return;
 }
 
-let currentUsername = Bot.getProperty("help_admin_username") || "Botsmasters_support";
+let currentUsername = Bot.getProperty("help_admin_username") || "CODEVEXA";
+let cleanName = currentUsername.replace("@", "").trim();
 
 let text =
   "💬 *Help Contact Settings*\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "Current Admin Username: *@" + currentUsername.replace("@", "") + "*\n" +
-  "Contact Link: https://t.me/" + currentUsername.replace("@", "") + "\n\n" +
-  "Users clicking *ℹ️ Help* will be directed to this Telegram account.\n" +
+  "Current Admin Username: *@" + cleanName + "*\n" +
+  "Clickable Link: https://t.me/" + cleanName + "\n\n" +
+  "Users clicking *Contact Admin* in the Help section will be redirected to this Telegram account.\n" +
+  "Default Username: `@CODEVEXA`\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "Tap below to change the username:";
+  "Tap below to change the contact username:";
 
 let buttons = [
-  [{ title: "✏️ Change Help Username", command: "/admin_set_help_input" }],
+  [{ title: "✏️ Change Contact Username", command: "/admin_set_help_input" }],
+  [{ title: "🔄 Reset to Default (@CODEVEXA)", command: "/admin_set_help_input default" }],
   [{ title: "🔙 Admin Dashboard", command: "/admin" }]
 ];
 

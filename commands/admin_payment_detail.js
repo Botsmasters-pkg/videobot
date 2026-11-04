@@ -90,3 +90,4 @@ if (payment.photo_file_id) {
 } else {
   Bot.sendInlineKeyboard(buttons, caption);
 }
+

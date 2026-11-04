@@ -54,3 +54,4 @@ Bot.sendInlineKeyboard(
   buttons,
   "✅ *Points Deducted Successfully!*\n\n• User ID: `" + targetId + "`\n• Deducted: *-" + pointsToDeduct + " Points*\n• Remaining Balance: *" + newPts + " Points*"
 );
+

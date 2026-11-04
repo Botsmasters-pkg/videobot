@@ -38,3 +38,4 @@ let buttons = [
 ];
 
 Bot.sendInlineKeyboard(buttons, "✅ *Pricing Package Deleted Successfully!*");
+

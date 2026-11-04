@@ -27,3 +27,4 @@ Bot.sendInlineKeyboard(
 );
 
 Bot.run({ command: "/admin_save_vid_points" });
+

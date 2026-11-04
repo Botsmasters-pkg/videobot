@@ -1,6 +1,6 @@
 /*CMD
 command: /buy_package
-help: Generates Dynamic UPI QR Code for Selected Package
+help: Generates Dynamic UPI QR Code for Selected Package with I Have Paid button
 need_reply: false
 auto_retry_time: 
 folder: 
@@ -64,7 +64,7 @@ User.setProperty("active_order", {
   upi_id: adminUpi,
   created_at: new Date().toISOString()
 }, "json");
-User.setProperty("awaiting_payment_screenshot", true, "boolean");
+User.setProperty("awaiting_payment_screenshot", false, "boolean");
 
 let caption =
   "💳 *Dynamic UPI Payment QR Code*\n" +
@@ -77,13 +77,12 @@ let caption =
   "📌 *Easy Payment Steps:*\n" +
   "1. Scan this QR code using *Google Pay, PhonePe, Paytm, or BHIM*.\n" +
   "2. The amount *₹" + selectedPkg.amount + "* is automatically pre-filled.\n" +
-  "3. Alternatively, copy the UPI ID above and pay ₹" + selectedPkg.amount + " manually.\n" +
-  "4. Once paid, **send or upload the payment screenshot directly in this chat**!\n" +
-  "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "_Awaiting payment screenshot..._";
+  "3. Complete the payment in your UPI app.\n" +
+  "4. After completing the payment, tap **I Have Paid** below to submit your payment screenshot!\n" +
+  "━━━━━━━━━━━━━━━━━━━━━";
 
 let inlineKeyboard = [
-  [{ text: "📤 Upload Screenshot", callback_data: "/upload_screenshot" }],
+  [{ text: "✅ I Have Paid", callback_data: "/i_have_paid" }],
   [{ text: "❌ Cancel Order", callback_data: "/cancel_payment" }],
   [{ text: "🔙 Choose Another Package", callback_data: "/buy_points" }]
 ];

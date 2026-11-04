@@ -1,6 +1,6 @@
 /*CMD
 command: /admin_payments
-help: Admin Payment Approval & Review System
+help: Admin Payment Approval & Review System with Pending, Approved, and Rejected filters
 need_reply: false
 auto_retry_time: 
 folder: 
@@ -18,62 +18,65 @@ if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) 
 
 let payments = Bot.getProperty("payment_requests") || [];
 
+let currentFilter = (params || "pending").trim().toLowerCase();
+if (currentFilter !== "pending" && currentFilter !== "approved" && currentFilter !== "rejected") {
+  currentFilter = "pending";
+}
+
 let pendingList = [];
-let approvedCount = 0;
-let rejectedCount = 0;
+let approvedList = [];
+let rejectedList = [];
 
 for (let i = 0; i < payments.length; i++) {
   let p = payments[i];
   if (p.status === "pending") {
     pendingList.push(p);
   } else if (p.status === "approved") {
-    approvedCount++;
+    approvedList.push(p);
   } else if (p.status === "rejected") {
-    rejectedCount++;
+    rejectedList.push(p);
   }
 }
 
-let buttons = [];
+let activeList = currentFilter === "approved" ? approvedList : (currentFilter === "rejected" ? rejectedList : pendingList);
 
-if (pendingList.length === 0) {
-  buttons.push([{ title: "🔄 Refresh List", command: "/admin_payments" }]);
-  buttons.push([{ title: "🔙 Admin Dashboard", command: "/admin" }]);
-
-  let text =
-    "💳 *Payment Management Dashboard*\n" +
-    "━━━━━━━━━━━━━━━━━━━━━\n" +
-    "🟡 *Pending Requests:* 0\n" +
-    "🟢 *Total Approved:* " + approvedCount + "\n" +
-    "🔴 *Total Rejected:* " + rejectedCount + "\n" +
-    "━━━━━━━━━━━━━━━━━━━━━\n" +
-    "_No pending payment approval requests right now._";
-
-  Bot.sendInlineKeyboard(buttons, text);
-  return;
-}
-
-// Show up to 10 pending requests
-let maxShow = Math.min(pendingList.length, 10);
-for (let i = 0; i < maxShow; i++) {
-  let item = pendingList[i];
-  buttons.push([
-    {
-      title: "🔍 " + item.order_id + " (₹" + item.amount + " ➔ " + item.points + " pts)",
-      command: "/admin_payment_detail " + item.order_id
-    }
-  ]);
-}
-
-buttons.push([{ title: "🔄 Refresh List", command: "/admin_payments" }]);
-buttons.push([{ title: "🔙 Admin Dashboard", command: "/admin" }]);
+let filterTitle = currentFilter === "approved" ? "🟢 Approved Payments" : (currentFilter === "rejected" ? "🔴 Rejected Payments" : "🟡 Pending Payments");
 
 let text =
   "💳 *Payment Management Dashboard*\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "🟡 *Pending Requests:* *" + pendingList.length + "*\n" +
-  "🟢 *Total Approved:* *" + approvedCount + "*\n" +
-  "🔴 *Total Rejected:* *" + rejectedCount + "*\n" +
-  "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "Tap any pending order below to review the screenshot and approve/reject:";
+  "🟡 *Pending:* *" + pendingList.length + "* | 🟢 *Approved:* *" + approvedList.length + "* | 🔴 *Rejected:* *" + rejectedList.length + "*\n\n" +
+  "Showing: *" + filterTitle + "* (" + activeList.length + ")\n" +
+  "━━━━━━━━━━━━━━━━━━━━━\n";
+
+let buttons = [
+  [
+    { title: "🟡 Pending (" + pendingList.length + ")", command: "/admin_payments pending" },
+    { title: "🟢 Approved (" + approvedList.length + ")", command: "/admin_payments approved" },
+    { title: "🔴 Rejected (" + rejectedList.length + ")", command: "/admin_payments rejected" }
+  ]
+];
+
+if (activeList.length === 0) {
+  text += "_No " + currentFilter + " payments found._\n";
+} else {
+  text += "Tap any payment below to inspect screenshot and details:\n";
+  let maxShow = Math.min(activeList.length, 10);
+  for (let i = activeList.length - 1; i >= Math.max(0, activeList.length - 10); i--) {
+    let item = activeList[i];
+    let icon = item.status === "approved" ? "🟢" : (item.status === "rejected" ? "🔴" : "🟡");
+    buttons.push([
+      {
+        title: icon + " " + item.order_id + " (₹" + item.amount + " ➔ " + item.points + " pts)",
+        command: "/admin_payment_detail " + item.order_id
+      }
+    ]);
+  }
+}
+
+buttons.push([
+  { title: "🔄 Refresh", command: "/admin_payments " + currentFilter },
+  { title: "🛠 Admin Dashboard", command: "/admin" }
+]);
 
 Bot.sendInlineKeyboard(buttons, text);

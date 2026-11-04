@@ -34,3 +34,4 @@ if (targetId) {
 }
 
 Bot.run({ command: "/admin_do_add_points" });
+

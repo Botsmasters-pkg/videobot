@@ -26,3 +26,4 @@ if (params === "all") {
 }
 
 Bot.runCommand("/admin_channels");
+
