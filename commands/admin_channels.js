@@ -1,6 +1,6 @@
 /*CMD
 command: /admin_channels
-help: Force Channel Management Dashboard (Public, Private, Request)
+help: 📢 Force Channels Admin Menu (Reply Keyboard)
 need_reply: false
 auto_retry_time: 
 folder: 
@@ -16,41 +16,46 @@ if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) 
   return;
 }
 
-let isGlobalEnabled = Bot.getProperty("force_channels_enabled");
-let statusBadge = (isGlobalEnabled !== false) ? "🟢 Active (Enforced)" : "🔴 Disabled (Off)";
+User.setProperty("in_fc_menu", true, "boolean");
+User.setProperty("fc_state", null, "string");
+User.setProperty("fc_temp_ref", null, "json");
+User.setProperty("fc_temp_type", null, "string");
+User.setProperty("fc_pending_remove_id", null, "string");
 
 let channels = Bot.getProperty("force_channels") || [];
+let enabledCount = 0;
+for (let i = 0; i < channels.length; i++) {
+  if (channels[i].enabled !== false) enabledCount++;
+}
 
 let text =
-  "📢 *Force Channel Management Dashboard*\n" +
+  "📢 *FORCE CHANNELS*\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "⚙️ *Global System Status:* " + statusBadge + "\n" +
-  "📊 *Total Added Channels:* *" + channels.length + "*\n\n" +
-  "📌 *Supported Channel Types:*\n" +
-  "1. 📢 *Public Channel:* Verified via `@channelusername`\n" +
-  "2. 🔒 *Private Channel:* Verified via Chat ID (`-100...`) & Invite Link\n" +
-  "3. 📩 *Private Request Channel:* Verified immediately upon Join Request sent\n" +
-  "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "Select a management option below 👇";
+  "📊 *Total Configured Channels:* *" + channels.length + "*\n" +
+  "🟢 *Active (Enabled):* *" + enabledCount + "*\n" +
+  "🔴 *Inactive (Disabled):* *" + (channels.length - enabledCount) + "*\n\n" +
+  "Select a management option from the keyboard below 👇";
 
-let toggleBtn = (isGlobalEnabled !== false) ? "🔴 Disable System" : "🟢 Enable System";
-
-let buttons = [
+let keyboard = [
   [
-    { title: "📋 List Channels (" + channels.length + ")", command: "/admin_list_channels" },
-    { title: "🗑 Remove Channel", command: "/admin_remove_channel" }
+    { text: "➕ Add Channel", style: "success" },
+    { text: "📋 List Channels", style: "primary" }
   ],
   [
-    { title: "📢 Add Public Channel", command: "/admin_add_pub_chan" },
-    { title: "🔒 Add Private Channel", command: "/admin_add_priv_chan" }
+    { text: "🗑 Remove Channel", style: "danger" },
+    { text: "🔁 Enable/Disable Channel", style: "primary" }
   ],
   [
-    { title: "📩 Add Request Channel", command: "/admin_add_req_chan" },
-    { title: toggleBtn, command: "/admin_toggle_chan all" }
-  ],
-  [
-    { title: "🛠 Admin Dashboard", command: "/admin" }
+    { text: "🔙 Back", style: "primary" }
   ]
 ];
 
-Bot.sendInlineKeyboard(buttons, text);
+Api.sendMessage({
+  chat_id: user.telegramid,
+  text: text,
+  parse_mode: "Markdown",
+  reply_markup: {
+    keyboard: keyboard,
+    resize_keyboard: true
+  }
+});

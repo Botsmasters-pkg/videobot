@@ -213,6 +213,45 @@ if (user) {
   let isBulkMode = User.getProperty("admin_bulk_mode");
   let isAdmin = (user.telegramid == 8710308658 || user.telegramid == "8710308658");
 
+  // Intercept Admin Force Channels Reply Keyboard Buttons
+  if (isAdmin && typeof message === "string") {
+    let m = message.trim();
+    if (m === "➕ Add Channel") {
+      Bot.runCommand("/admin_fc_add");
+      return false;
+    }
+    if (m === "📋 List Channels") {
+      Bot.runCommand("/admin_fc_list");
+      return false;
+    }
+    if (m === "🗑 Remove Channel") {
+      Bot.runCommand("/admin_fc_remove");
+      return false;
+    }
+    if (m === "🔁 Enable/Disable Channel") {
+      Bot.runCommand("/admin_fc_toggle");
+      return false;
+    }
+    if (m === "🔙 Back") {
+      User.setProperty("in_fc_menu", false, "boolean");
+      Api.sendMessage({
+        chat_id: user.telegramid,
+        text: "Returning to Admin Panel...",
+        reply_markup: { remove_keyboard: true }
+      });
+      Bot.runCommand("/admin");
+      return false;
+    }
+    if ((m === "❌ Cancel" || m === "🔴 Cancel") && User.getProperty("in_fc_menu")) {
+      User.setProperty("fc_state", null, "string");
+      User.setProperty("fc_temp_ref", null, "json");
+      User.setProperty("fc_temp_type", null, "string");
+      User.setProperty("fc_pending_remove_id", null, "string");
+      Bot.runCommand("/admin_channels");
+      return false;
+    }
+  }
+
   if (isBulkMode && isAdmin) {
     let vid = (request && request.video) ? request.video : (request && request.message && request.message.video);
     let doc = (request && request.document) ? request.document : (request && request.message && request.message.document);
