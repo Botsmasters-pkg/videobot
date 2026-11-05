@@ -100,18 +100,10 @@ if (index >= activeChannels.length) {
   buttons.push([{ title: "🔵 Check Membership", command: "/verify_step 0", style: "primary" }]);
 
   let text =
-    "⚠️ <b>Channel Membership Required!</b>\n" +
+    "📢 <b>Channel Membership Required!</b>\n" +
     "━━━━━━━━━━━━━━━━━━━━━\n" +
-    "To access this bot and watch videos, you must join our required channel(s) below:\n\n";
-
-  for (let i = 0; i < missing.length; i++) {
-    let m = missing[i];
-    let cleanName = m.title || "Official Channel";
-    text += (i + 1) + ". <b>" + esc(cleanName) + "</b>\n";
-  }
-
-  text +=
-    "\n👉 Tap <b>𝗝𝗢𝗜𝗡</b> above to join each channel, then tap <b>Check Membership</b>:\n" +
+    "To access this bot and watch videos, you must join our required channel(s).\n\n" +
+    "👉 Tap <b>𝗝𝗢𝗜𝗡</b> below to join, then tap <b>Check Membership</b> to continue:\n" +
     "━━━━━━━━━━━━━━━━━━━━━";
 
   Bot.sendInlineKeyboard(buttons, text, { parse_mode: "HTML" });

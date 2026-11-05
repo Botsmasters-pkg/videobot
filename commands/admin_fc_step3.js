@@ -86,3 +86,4 @@ User.setProperty("fc_state", null, "string");
 Bot.sendMessage("✅ <b>Force Join channel added successfully.</b>", { parse_mode: "HTML" });
 
 Bot.runCommand("/admin_channels");
+

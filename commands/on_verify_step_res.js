@@ -38,3 +38,4 @@ if (!isMember && ch) {
 }
 
 Bot.runCommand("/verify_step " + (index + 1));
+
