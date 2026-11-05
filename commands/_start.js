@@ -50,6 +50,11 @@ if (!isRegistered) {
     Bot.setProperty("categories", [], "json");
   }
 
+  // Initialize default storage channel if not set
+  if (!Bot.getProperty("storage_channel_id")) {
+    Bot.setProperty("storage_channel_id", "-1003856912131", "string");
+  }
+
   // Handle Referral
   if (params) {
     let cleanParam = params.toString().replace("ref_", "").replace("ref", "").trim();

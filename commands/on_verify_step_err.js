@@ -52,3 +52,4 @@ if (!isPending && ch) {
 
 // Move to next channel
 Bot.runCommand("/verify_step " + (index + 1));
+

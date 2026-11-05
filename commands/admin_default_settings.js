@@ -25,6 +25,7 @@ if (params && params.trim() === "apply") {
   Bot.setProperty("admin_payee_name", "Video Bot", "string");
   Bot.setProperty("force_channels_enabled", true, "boolean");
   Bot.setProperty("referral_enabled", true, "boolean");
+  Bot.setProperty("storage_channel_id", "-1003856912131", "string");
 
   let defaultPackages = [
     { id: 1, amount: 10, points: 100 },
@@ -47,6 +48,7 @@ if (params && params.trim() === "apply") {
     "• 🆓 *Complimentary Videos:* `First 2 Videos Free`\n" +
     "• 📱 *Default UPI ID:* `paytmqr2810050501011@paytm`\n" +
     "• 🏷 *Pricing Packages:* `₹10=100pts, ₹20=200pts, ₹50=500pts, ₹100=1000pts`\n" +
+    "• 📦 *Storage Channel:* `-1003856912131`\n" +
     "• 📢 *Force Channels:* `Active (Enabled)`\n" +
     "━━━━━━━━━━━━━━━━━━━━━\n" +
     "All configurations are saved and actively applied across the entire bot!";

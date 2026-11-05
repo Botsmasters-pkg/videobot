@@ -54,38 +54,61 @@ if (!fileId) {
   return;
 }
 
-// Save video directly
+// Save video with Storage Channel reference
+let activeStorageChannel = Bot.getProperty("storage_channel_id") || "-1003856912131";
 let videos = Bot.getProperty("videos") || [];
 let newId = Date.now();
 
-videos.push({
+let newVid = {
   id: newId,
   category_id: null,
   file_id: fileId,
+  storage_channel_id: activeStorageChannel,
+  storage_message_id: null,
+  storage_file_id: null,
   title: autoTitle,
   description: "",
   is_zip: false,
   views: 0,
-  created_at: new Date().toISOString()
-});
+  created_at: new Date().toISOString(),
+  upload_status: "active"
+};
 
+videos.push(newVid);
 Bot.setProperty("videos", videos, "json");
+
+// Archive video to active Storage Channel
+try {
+  Api.sendVideo({
+    chat_id: activeStorageChannel,
+    video: fileId,
+    caption: "🎬 *" + autoTitle + "*\n🆔 ID: `" + newId + "`\n📅 Uploaded: `" + new Date().toISOString() + "`",
+    parse_mode: "Markdown",
+    supports_streaming: true,
+    on_result: "/on_storage_upload_res " + newId,
+    on_error: "/on_storage_upload_err " + newId
+  });
+} catch (e) {
+  // Ignore sync exception if any
+}
 
 let buttons = [
   [{ title: "📤 Upload Another Video", command: "/admin_upload" }],
   [
     { title: "📋 Manage Videos (" + videos.length + ")", command: "/admin_manage_vids" },
-    { title: "🛠 Admin Dashboard", command: "/admin" }
-  ]
+    { title: "📦 Storage Settings", command: "/admin_storage_settings" }
+  ],
+  [{ title: "🛠 Admin Dashboard", command: "/admin" }]
 ];
 
 let summary =
-  "🎉 *Video Uploaded Successfully!*\n" +
+  "🎉 *Video Uploaded & Saved to Storage!*\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
   "🆔 *Video ID:* `" + newId + "`\n" +
   "🎬 *Title:* *" + autoTitle + "*\n" +
+  "📦 *Archived in Storage Channel:* `" + activeStorageChannel + "`\n" +
   "📊 *Total Videos in Library:* *" + videos.length + "*\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "The video is live and will stream directly in Telegram's native player!";
+  "The video is live and available in the rotation queue!";
 
 Bot.sendInlineKeyboard(buttons, summary);

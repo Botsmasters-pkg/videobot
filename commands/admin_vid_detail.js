@@ -48,7 +48,10 @@ let text =
   "🆔 *ID:* `" + vid.id + "`\n" +
   "📂 *Category:* " + catEmoji + " " + catName + "\n" +
   "🎬 *Title:* " + vid.title + "\n" +
+  "📦 *Storage Channel:* `" + (vid.storage_channel_id || "-1003856912131") + "`\n" +
+  "🧾 *Storage Msg ID:* `" + (vid.storage_message_id || "N/A") + "`\n" +
   "👁 *Views:* " + (vid.views || 0) + "\n" +
+  "📅 *Uploaded:* `" + (vid.created_at ? vid.created_at.substring(0, 19).replace("T", " ") : "N/A") + "`\n" +
   "📝 *Description:*\n" + (vid.description || "None") + "\n" +
   "━━━━━━━━━━━━━━━━━━━━━";
 

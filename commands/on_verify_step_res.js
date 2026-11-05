@@ -58,3 +58,4 @@ if (!isMember) {
 
 // Proceed to verify next channel
 Bot.runCommand("/verify_step " + (index + 1));
+

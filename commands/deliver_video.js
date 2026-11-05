@@ -210,9 +210,29 @@ let inlineKeyboard = [
   [{ text: "🏠 Main Menu", callback_data: "/start" }]
 ];
 
+// Deliver Video using Storage Channel copyMessage if available, else sendVideo
+if (nextVideo.storage_channel_id && nextVideo.storage_message_id) {
+  try {
+    Api.copyMessage({
+      chat_id: chat.chatid,
+      from_chat_id: nextVideo.storage_channel_id,
+      message_id: nextVideo.storage_message_id,
+      caption: caption,
+      parse_mode: "Markdown",
+      reply_markup: {
+        inline_keyboard: inlineKeyboard
+      }
+    });
+    return;
+  } catch (e) {
+    // Fall back to sendVideo if copyMessage encounters an issue
+  }
+}
+
+// Fallback: Direct Video Streaming via File ID
 Api.sendVideo({
   chat_id: chat.chatid,
-  video: nextVideo.file_id,
+  video: nextVideo.storage_file_id || nextVideo.file_id,
   caption: caption,
   parse_mode: "Markdown",
   supports_streaming: true,
@@ -220,3 +240,4 @@ Api.sendVideo({
     inline_keyboard: inlineKeyboard
   }
 });
+

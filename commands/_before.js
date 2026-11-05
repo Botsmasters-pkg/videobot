@@ -104,19 +104,39 @@ if (user) {
           return false;
         }
 
-        // Add Video
+        // Add Video with Storage Channel reference
+        let activeStorage = Bot.getProperty("storage_channel_id") || "-1003856912131";
         let newVidId = Date.now() + Math.floor(Math.random() * 1000);
         videos.push({
           id: newVidId,
           category_id: catId,
           file_id: fileId,
+          storage_channel_id: activeStorage,
+          storage_message_id: null,
+          storage_file_id: null,
           title: autoTitle,
           description: "",
           is_zip: false,
           views: 0,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          upload_status: "active"
         });
         Bot.setProperty("videos", videos, "json");
+
+        // Archive to active Storage Channel
+        try {
+          Api.sendVideo({
+            chat_id: activeStorage,
+            video: fileId,
+            caption: "🎬 *" + autoTitle + "*\n🆔 ID: `" + newVidId + "`\n📅 Uploaded: `" + new Date().toISOString() + "`",
+            parse_mode: "Markdown",
+            supports_streaming: true,
+            on_result: "/on_storage_upload_res " + newVidId,
+            on_error: "/on_storage_upload_err " + newVidId
+          });
+        } catch (e) {
+          // Ignore sync exception if any
+        }
 
         let uploadedCount = (User.getProperty("admin_bulk_uploaded") || 0) + 1;
         User.setProperty("admin_bulk_uploaded", uploadedCount, "integer");

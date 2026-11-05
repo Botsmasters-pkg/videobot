@@ -54,18 +54,21 @@ let buttons = [
   ],
   [
     { title: "📢 Force Channels", command: "/admin_channels" },
-    { title: "💬 Help Username Settings", command: "/admin_help_settings" }
+    { title: "📦 Storage Channel", command: "/admin_storage_settings" }
   ],
   [
-    { title: "🔍 User Points Lookup", command: "/admin_view_user_points" },
-    { title: "📊 Global Statistics", command: "/admin_stats" }
+    { title: "💬 Help Username Settings", command: "/admin_help_settings" },
+    { title: "🔍 User Points Lookup", command: "/admin_view_user_points" }
   ],
   [
-    { title: "📢 Broadcast Message", command: "/admin_broadcast" },
-    { title: "🚫 Ban/Unban User", command: "/admin_ban" }
+    { title: "📊 Global Statistics", command: "/admin_stats" },
+    { title: "📢 Broadcast Message", command: "/admin_broadcast" }
   ],
   [
-    { title: "⚙️ Default Settings / Region", command: "/admin_default_settings" },
+    { title: "🚫 Ban/Unban User", command: "/admin_ban" },
+    { title: "⚙️ Default Settings / Region", command: "/admin_default_settings" }
+  ],
+  [
     { title: "🔙 Back to User Panel", command: "/start" }
   ]
 ];
