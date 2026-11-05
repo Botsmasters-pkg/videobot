@@ -1,6 +1,6 @@
 /*CMD
 command: /admin_got_req_link
-help: Saves Private Request Channel with Chat ID and Request Link
+help: Saves Request Channel with Name, Chat ID, and Link
 need_reply: true
 auto_retry_time: 
 folder: 
@@ -17,6 +17,7 @@ if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) 
 }
 
 if (!message || message.trim() === "/admin") {
+  User.setProperty("temp_req_name", null, "string");
   User.setProperty("temp_req_chat_id", null, "string");
   Bot.runCommand("/admin_channels");
   return;
@@ -30,12 +31,10 @@ if (link.indexOf("t.me") === -1) {
 }
 
 let chatId = User.getProperty("temp_req_chat_id");
-if (!chatId) {
-  Bot.runCommand("/admin_add_req_chan");
-  return;
-}
+let channelName = User.getProperty("temp_req_name") || ("Request Channel (" + chatId + ")");
 
 User.setProperty("temp_req_chat_id", null, "string");
+User.setProperty("temp_req_name", null, "string");
 
 let channels = Bot.getProperty("force_channels") || [];
 let newId = Date.now();
@@ -46,7 +45,7 @@ channels.push({
   username: null,
   chat_id: chatId,
   invite_link: link,
-  title: "Request Channel (" + chatId + ")",
+  title: channelName,
   enabled: true
 });
 
@@ -61,9 +60,9 @@ let buttons = [
 Bot.sendInlineKeyboard(
   buttons,
   "✅ *Private Request Channel Added Successfully!*\n\n" +
-  "• 📩 *Type:* Private Request Channel\n" +
+  "• 🏷 *Channel Name:* " + channelName + "\n" +
+  "• 🔘 *Join Button Preview:* `[ " + channelName + " ]`\n" +
   "• 🆔 *Chat ID:* `" + chatId + "`\n" +
   "• 🔗 *Request Link:* " + link + "\n\n" +
-  "Users sending a Join Request to this channel will be verified immediately."
+  "Users will see the button with only the channel name: *" + channelName + "*!"
 );
-

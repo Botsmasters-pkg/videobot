@@ -1,6 +1,6 @@
 /*CMD
 command: /admin_add_pub_chan
-help: Prompt admin for public channel username
+help: Prompt admin for public channel name (Step 1 of 2)
 need_reply: false
 auto_retry_time: 
 folder: 
@@ -20,10 +20,12 @@ let buttons = [[{ title: "🔙 Cancel & Return", command: "/admin_channels" }]];
 
 Bot.sendInlineKeyboard(
   buttons,
-  "📢 *Add Public Channel*\n\n" +
-  "Enter the channel username starting with `@` (e.g. `@MyTelegramChannel`):\n\n" +
-  "⚠️ *Important:* Make sure the bot is added as an **Administrator** in your channel so it can verify user memberships!"
+  "📢 *Add Public Channel — Step 1 of 2*\n" +
+  "━━━━━━━━━━━━━━━━━━━━━\n" +
+  "👉 Enter the **Channel Name** to display on the Join Button (e.g. `CODE VEX UPDATES`):\n\n" +
+  "📌 *Note:* Only this name will appear on the button for users. Technical details like @username will remain hidden.\n" +
+  "━━━━━━━━━━━━━━━━━━━━━\n" +
+  "_(Send /admin to cancel)_"
 );
 
-Bot.run({ command: "/admin_save_pub_chan" });
-
+Bot.run({ command: "/admin_got_pub_name" });

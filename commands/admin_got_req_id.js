@@ -1,6 +1,6 @@
 /*CMD
 command: /admin_got_req_id
-help: Step 2 of 2 - Prompt admin for Request Channel Invite Link
+help: Step 3 of 3 - Prompt admin for Request Channel Invite Link
 need_reply: true
 auto_retry_time: 
 folder: 
@@ -17,6 +17,7 @@ if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) 
 }
 
 if (!message || message.trim() === "/admin") {
+  User.setProperty("temp_req_name", null, "string");
   Bot.runCommand("/admin_channels");
   return;
 }
@@ -34,10 +35,9 @@ let buttons = [[{ title: "❌ Cancel", command: "/admin_channels" }]];
 
 let text =
   "✅ *Chat ID Saved:* `" + chatId + "`\n\n" +
-  "📩 *Step 2 of 2:* Now enter the **Join Request Invite Link** for this channel (e.g. `https://t.me/+JoinRequestLink`):\n\n" +
-  "📌 *Rule:* When users click this link and submit a Join Request, they are considered verified immediately without waiting for admin approval!\n\n" +
+  "📩 *Step 3 of 3:* Now enter the **Join Request Invite Link** for this channel (e.g. `https://t.me/+JoinRequestLink`):\n\n" +
+  "📌 *Rule:* When users submit a Join Request, they are verified immediately without waiting for admin approval!\n\n" +
   "_(Send /admin to cancel)_";
 
 Bot.sendInlineKeyboard(buttons, text);
 Bot.run({ command: "/admin_got_req_link" });
-

@@ -1,6 +1,6 @@
 /*CMD
 command: /admin_got_priv_link
-help: Saves Private Channel with Chat ID and Invite Link
+help: Saves Private Channel with Name, Chat ID, and Invite Link
 need_reply: true
 auto_retry_time: 
 folder: 
@@ -17,6 +17,7 @@ if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) 
 }
 
 if (!message || message.trim() === "/admin") {
+  User.setProperty("temp_priv_name", null, "string");
   User.setProperty("temp_chan_chat_id", null, "string");
   Bot.runCommand("/admin_channels");
   return;
@@ -30,12 +31,10 @@ if (link.indexOf("t.me") === -1) {
 }
 
 let chatId = User.getProperty("temp_chan_chat_id");
-if (!chatId) {
-  Bot.runCommand("/admin_add_priv_chan");
-  return;
-}
+let channelName = User.getProperty("temp_priv_name") || ("Private Channel (" + chatId + ")");
 
 User.setProperty("temp_chan_chat_id", null, "string");
+User.setProperty("temp_priv_name", null, "string");
 
 let channels = Bot.getProperty("force_channels") || [];
 let newId = Date.now();
@@ -46,7 +45,7 @@ channels.push({
   username: null,
   chat_id: chatId,
   invite_link: link,
-  title: "Private Channel (" + chatId + ")",
+  title: channelName,
   enabled: true
 });
 
@@ -61,9 +60,9 @@ let buttons = [
 Bot.sendInlineKeyboard(
   buttons,
   "✅ *Private Channel Added Successfully!*\n\n" +
-  "• 🔒 *Type:* Private Channel\n" +
+  "• 🏷 *Channel Name:* " + channelName + "\n" +
+  "• 🔘 *Join Button Preview:* `[ " + channelName + " ]`\n" +
   "• 🆔 *Chat ID:* `" + chatId + "`\n" +
   "• 🔗 *Invite Link:* " + link + "\n\n" +
-  "Users will now be required to join this channel before using the bot."
+  "Users will see the button with only the channel name: *" + channelName + "*!"
 );
-

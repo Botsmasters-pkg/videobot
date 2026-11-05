@@ -1,6 +1,6 @@
 /*CMD
 command: /get_video
-help: Continuous video rotation with new video priority, 2 free videos, and points verification
+help: Real-time force channel verification on every Get Video request
 need_reply: false
 auto_retry_time: 
 folder: 
@@ -10,222 +10,26 @@ aliases:
 group: 
 CMD*/
 
-let videos = Bot.getProperty("videos") || [];
-
-// 1. Check if videos exist in the library
-if (!videos || videos.length === 0) {
-  let buttons = [[{ title: "🏠 Main Menu", command: "/start" }]];
-  Bot.sendInlineKeyboard(
-    buttons,
-    "⚠️ *No video has been uploaded yet.*\n\nPlease check back later when an admin uploads videos!"
-  );
-  return;
-}
-
-// 2. Concurrency & Rapid Click Protection (debounce rapid taps)
-let now = Date.now();
-let lastClick = User.getProperty("last_get_video_click") || 0;
-if (now - lastClick < 1500) {
-  // Rapid double-tap ignored to ensure transaction safety
-  return;
-}
-User.setProperty("last_get_video_click", now, "integer");
-
-// 3. User Identity & Points Setup
 let isAdmin = (user.telegramid == 8710308658 || user.telegramid == "8710308658");
-let freeUsed = User.getProperty("free_videos_used") || 0;
-let userPoints = Bot.getProperty("points_" + user.telegramid);
-if (userPoints === null || userPoints === undefined) {
-  userPoints = User.getProperty("points") || 0;
+let isGlobalEnabled = Bot.getProperty("force_channels_enabled");
+let channels = Bot.getProperty("force_channels") || [];
+let activeChannels = [];
+for (let i = 0; i < channels.length; i++) {
+  if (channels[i].enabled !== false) {
+    activeChannels.push(channels[i]);
+  }
 }
-let videoCost = Bot.getProperty("points_per_video") || 5;
-let isFreeVideo = (!isAdmin && freeUsed < 2);
 
-// 4. Points Verification BEFORE Queue Progression
-if (!isAdmin && !isFreeVideo && userPoints < videoCost) {
-  // Exact Insufficient Points message as required
-  let insufficientText =
-    "You don't have enough points to get the next video!\n\n" +
-    "Earn free points by referring friends or purchase points to continue watching videos.";
-
-  let buttons = [
-    [
-      { title: "🎁 Refer & Earn", command: "/referral" },
-      { title: "💳 Buy Points", command: "/buy_points" }
-    ],
-    [{ title: "🏠 Main Menu", command: "/start" }]
-  ];
-
-  Bot.sendInlineKeyboard(buttons, insufficientText);
+// 1. If admin, or force channels disabled globally, or 0 active channels -> Deliver immediately!
+if (isAdmin || isGlobalEnabled === false || activeChannels.length === 0) {
+  Bot.runCommand("/deliver_video");
   return;
 }
 
-// 5. Rotation Logic: Priority to Brand-New Videos, then Continuous Sequential Rotation
-let allSeen = User.getProperty("all_seen_video_ids") || User.getProperty("watched_videos") || [];
-let cycleDelivered = User.getProperty("cycle_delivered_ids") || [];
-let lastRegularId = User.getProperty("last_rotation_vid_id");
-let cycleNumber = User.getProperty("rotation_cycle") || 1;
+// 2. Real-time Live Membership Verification on EVERY Get Video click!
+// Reset missing channels and set pending action flag so verified user gets video directly
+User.setProperty("missing_channels", [], "json");
+User.setProperty("pending_video_request", true, "boolean");
 
-let nextVideo = null;
-let isNewPriorityVideo = false;
-
-// Step A: Priority Check - Look for brand new videos never seen by this user
-let brandNewVideos = [];
-for (let i = 0; i < videos.length; i++) {
-  if (allSeen.indexOf(videos[i].id) === -1) {
-    brandNewVideos.push(videos[i]);
-  }
-}
-
-if (brandNewVideos.length > 0) {
-  // Brand new videos exist -> Take the first one (priority delivery)
-  nextVideo = brandNewVideos[0];
-  isNewPriorityVideo = true;
-} else {
-  // Step B: Continuous Sequential Rotation
-  // Check if current cycle is complete (all library videos delivered in this cycle)
-  let remainingInCycle = [];
-  for (let i = 0; i < videos.length; i++) {
-    if (cycleDelivered.indexOf(videos[i].id) === -1) {
-      remainingInCycle.push(videos[i]);
-    }
-  }
-
-  // If all videos in library have been delivered in this cycle, advance to next cycle!
-  if (remainingInCycle.length === 0) {
-    cycleNumber = cycleNumber + 1;
-    User.setProperty("rotation_cycle", cycleNumber, "integer");
-    cycleDelivered = [];
-    User.setProperty("cycle_delivered_ids", cycleDelivered, "json");
-    lastRegularId = null;
-    User.setProperty("last_rotation_vid_id", null, "string");
-  }
-
-  // Find index of last regular video delivered in rotation
-  let lastIndex = -1;
-  if (lastRegularId !== null && lastRegularId !== undefined) {
-    for (let i = 0; i < videos.length; i++) {
-      if (videos[i].id == lastRegularId) {
-        lastIndex = i;
-        break;
-      }
-    }
-  }
-
-  // Search for the next undelivered video in sequence starting from lastIndex + 1 to end
-  for (let i = lastIndex + 1; i < videos.length; i++) {
-    if (cycleDelivered.indexOf(videos[i].id) === -1) {
-      nextVideo = videos[i];
-      break;
-    }
-  }
-
-  // If reached the end without finding, wrap around from beginning (0) to lastIndex
-  if (!nextVideo) {
-    for (let i = 0; i <= lastIndex && i < videos.length; i++) {
-      if (cycleDelivered.indexOf(videos[i].id) === -1) {
-        nextVideo = videos[i];
-        break;
-      }
-    }
-  }
-
-  // Ultimate fallback if any video is left undelivered
-  if (!nextVideo) {
-    for (let i = 0; i < videos.length; i++) {
-      if (cycleDelivered.indexOf(videos[i].id) === -1) {
-        nextVideo = videos[i];
-        break;
-      }
-    }
-  }
-}
-
-if (!nextVideo) {
-  Bot.sendMessage("⚠️ Unable to load next video. Please try again.");
-  return;
-}
-
-// 6. Deduct Points or Increment Free Video Counter
-let statusLine = "";
-if (isAdmin) {
-  statusLine = "👑 *Admin Access:* Unlimited";
-} else if (isFreeVideo) {
-  let newFree = freeUsed + 1;
-  User.setProperty("free_videos_used", newFree, "integer");
-  statusLine = "🎁 *Free Video:* " + newFree + " of 2 used (0 points deducted)";
-} else {
-  let newPoints = userPoints - videoCost;
-  User.setProperty("points", newPoints, "integer");
-  Bot.setProperty("points_" + user.telegramid, newPoints, "integer");
-
-  let totalSpent = (User.getProperty("total_points_spent") || 0) + videoCost;
-  User.setProperty("total_points_spent", totalSpent, "integer");
-
-  let history = User.getProperty("points_history") || [];
-  history.push({
-    type: "spent",
-    amount: videoCost,
-    reason: "Watched video (" + nextVideo.title + ")",
-    date: new Date().toISOString()
-  });
-  User.setProperty("points_history", history, "json");
-
-  statusLine = "💎 *Remaining Points:* *" + newPoints + " Points* (-" + videoCost + " pts)";
-}
-
-// 7. Update User Rotation State & History
-// Add to allSeen (lifetime history)
-if (allSeen.indexOf(nextVideo.id) === -1) {
-  allSeen.push(nextVideo.id);
-  User.setProperty("all_seen_video_ids", allSeen, "json");
-  User.setProperty("watched_videos", allSeen, "json");
-}
-
-// Add to current cycle history
-if (cycleDelivered.indexOf(nextVideo.id) === -1) {
-  cycleDelivered.push(nextVideo.id);
-  User.setProperty("cycle_delivered_ids", cycleDelivered, "json");
-}
-
-// Only advance regular rotation marker if this was a regular rotation video
-// (Preserves the exact position where old rotation was left off during new uploads)
-if (!isNewPriorityVideo) {
-  User.setProperty("last_rotation_vid_id", nextVideo.id, "string");
-}
-
-// Update views counter on video
-for (let i = 0; i < videos.length; i++) {
-  if (videos[i].id === nextVideo.id) {
-    videos[i].views = (videos[i].views || 0) + 1;
-    break;
-  }
-}
-Bot.setProperty("videos", videos, "json");
-
-// 8. Deliver Video to User
-let priorityTag = isNewPriorityVideo ? "🔥 *[New Video Priority]*\n" : "";
-let caption =
-  priorityTag +
-  "🎬 *" + nextVideo.title + "*\n" +
-  "━━━━━━━━━━━━━━━━━━━━━\n" +
-  statusLine + "\n" +
-  "🔄 *Cycle:* #" + cycleNumber + " (" + cycleDelivered.length + " of " + videos.length + " in rotation)\n" +
-  "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "✨ _Enjoy watching!_";
-
-let inlineKeyboard = [
-  [{ text: "🎬 Get Next Video", callback_data: "/get_video" }],
-  [{ text: "🏠 Main Menu", callback_data: "/start" }]
-];
-
-Api.sendVideo({
-  chat_id: chat.chatid,
-  video: nextVideo.file_id,
-  caption: caption,
-  parse_mode: "Markdown",
-  supports_streaming: true,
-  reply_markup: {
-    inline_keyboard: inlineKeyboard
-  }
-});
+// Start step-by-step real-time verification from channel 0
+Bot.runCommand("/verify_step 0");

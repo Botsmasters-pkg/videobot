@@ -261,9 +261,19 @@ if (user) {
             }
           }
 
-          // Allow channel verification commands to execute
+          // Allow channel verification and video delivery commands to execute
           let isVerifyCmd = false;
-          let allowedPrefixes = ["/check_channels", "/on_verify_member", "/on_verify_fail", "/verify_req_channel"];
+          let allowedPrefixes = [
+            "/verify_step",
+            "/on_verify_step_res",
+            "/on_verify_step_err",
+            "/check_channels",
+            "/on_verify_member",
+            "/on_verify_fail",
+            "/verify_req_channel",
+            "/deliver_video",
+            "/get_video"
+          ];
           for (let p = 0; p < allowedPrefixes.length; p++) {
             if (currentCmd.indexOf(allowedPrefixes[p]) === 0) {
               isVerifyCmd = true;
@@ -275,13 +285,14 @@ if (user) {
             let buttons = [];
             for (let i = 0; i < activeChannels.length; i++) {
               let ch = activeChannels[i];
-              let title = ch.title || (ch.username ? ch.username : "Channel #" + (i + 1));
+              let cleanName = (ch.title || "").replace(/^@/, "").replace(/^Private Channel \([^)]*\)/, "Private Channel").replace(/^Request Channel \([^)]*\)/, "Request Channel").trim() || "Official Channel";
               let link = ch.invite_link || (ch.username ? "https://t.me/" + ch.username.replace("@", "") : "");
               if (link) {
-                buttons.push([{ title: "📢 Join " + title, url: link }]);
+                // Button title is ONLY the channel name!
+                buttons.push([{ title: cleanName, url: link }]);
               }
             }
-            buttons.push([{ title: "🔄 Verify Membership", command: "/check_channels 0" }]);
+            buttons.push([{ title: "🔄 Verify Membership", command: "/verify_step 0" }]);
 
             let joinText =
               "⚠️ *Membership Required to Access Bot!*\n" +
@@ -290,13 +301,12 @@ if (user) {
 
             for (let i = 0; i < activeChannels.length; i++) {
               let ch = activeChannels[i];
-              let cType = ch.type ? ch.type.toUpperCase() : "PUBLIC";
-              let cName = ch.title || ch.username || ("Channel #" + (i + 1));
-              joinText += (i + 1) + ". *" + cName + "* (" + cType + ")\n";
+              let cleanName = (ch.title || "").replace(/^@/, "").replace(/^Private Channel \([^)]*\)/, "Private Channel").replace(/^Request Channel \([^)]*\)/, "Request Channel").trim() || "Official Channel";
+              joinText += (i + 1) + ". *" + cleanName + "*\n";
             }
 
             joinText +=
-              "\n👉 *Step 1:* Click each channel link above to join.\n" +
+              "\n👉 *Step 1:* Click each channel button above to join.\n" +
               "👉 *Step 2:* Tap *🔄 Verify Membership* below once you've joined.\n" +
               "━━━━━━━━━━━━━━━━━━━━━";
 
