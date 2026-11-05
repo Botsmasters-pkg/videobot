@@ -12,8 +12,13 @@ CMD*/
 
 let primaryAdmin = 8710308658;
 if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) {
-  Bot.sendMessage("🚫 *Access Denied.*");
+  Bot.sendMessage("🚫 Access Denied.");
   return;
+}
+
+function esc(s) {
+  if (!s) return "";
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 if (!message) {
@@ -22,7 +27,7 @@ if (!message) {
 }
 
 let mText = message.trim();
-if (mText === "❌ Cancel" || mText === "🔴 Cancel" || mText === "/admin") {
+if (mText === "❌ Cancel" || mText === "🔴 Cancel" || mText === "/admin" || mText === "Cancel") {
   Bot.runCommand("/admin_channels");
   return;
 }
@@ -42,7 +47,8 @@ if (matchNum) {
     if (
       String(c.chat_id) === mText ||
       String(c.id) === mText ||
-      (c.title && mText.includes(c.title))
+      (c.username && c.username.toLowerCase() === mText.toLowerCase()) ||
+      (c.title && mText.toLowerCase().includes(c.title.toLowerCase()))
     ) {
       target = c;
       break;
@@ -51,7 +57,23 @@ if (matchNum) {
 }
 
 if (!target) {
-  Bot.sendMessage("⚠️ *Channel not found.* Please tap one of the channel buttons below:");
+  // Re-send keyboard
+  let keyboardRows = [];
+  for (let i = 0; i < channels.length; i++) {
+    let ch = channels[i];
+    let isEnabled = (ch.enabled !== false);
+    let statusIcon = isEnabled ? "✅" : "🚫";
+    let cleanTitle = ch.title || ("Channel " + (ch.chat_id || ch.id));
+    keyboardRows.push([{ text: (i + 1) + ". " + statusIcon + " " + cleanTitle, style: isEnabled ? "primary" : "danger" }]);
+  }
+  keyboardRows.push([{ text: "❌ Cancel", style: "danger" }]);
+
+  Api.sendMessage({
+    chat_id: user.telegramid,
+    text: "⚠️ <b>Channel not recognized.</b> Please tap a channel button below:",
+    parse_mode: "HTML",
+    reply_markup: { keyboard: keyboardRows, resize_keyboard: true }
+  });
   Bot.run({ command: "/admin_fc_do_toggle" });
   return;
 }
@@ -78,15 +100,15 @@ Bot.setProperty("force_channel_logs", logs, "json");
 let oldIcon = oldStatus ? "✅ Enabled" : "🚫 Disabled";
 let newIcon = newStatus ? "✅ Enabled" : "🚫 Disabled";
 
-Bot.sendMessage(
-  "🔁 *Channel Status Updated!*\n\n" +
-  "• **Channel:** *" + (target.title || "Channel") + "*\n" +
-  "• **Previous:** " + oldIcon + "\n" +
-  "• **Current:** *" + newIcon + "*\n\n" +
+let updateMsg =
+  "🔁 <b>Channel Status Updated!</b>\n\n" +
+  "• <b>Channel:</b> " + esc(target.title || "Channel") + "\n" +
+  "• <b>Previous:</b> " + oldIcon + "\n" +
+  "• <b>Current:</b> <b>" + newIcon + "</b>\n\n" +
   (newStatus
     ? "🟢 Users will now be required to join this channel."
-    : "🚫 This channel will be bypassed during user verification.")
-);
+    : "🚫 This channel will be bypassed during user verification.");
+
+Bot.sendMessage(updateMsg, { parse_mode: "HTML" });
 
 Bot.runCommand("/admin_channels");
-

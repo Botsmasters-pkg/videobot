@@ -29,11 +29,11 @@ for (let i = 0; i < channels.length; i++) {
 }
 
 let text =
-  "📢 *FORCE CHANNELS*\n" +
+  "📢 <b>FORCE CHANNELS</b>\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "📊 *Total Configured Channels:* *" + channels.length + "*\n" +
-  "🟢 *Active (Enabled):* *" + enabledCount + "*\n" +
-  "🔴 *Inactive (Disabled):* *" + (channels.length - enabledCount) + "*\n\n" +
+  "📊 <b>Total Configured Channels:</b> " + channels.length + "\n" +
+  "🟢 <b>Active (Enabled):</b> " + enabledCount + "\n" +
+  "🔴 <b>Inactive (Disabled):</b> " + (channels.length - enabledCount) + "\n\n" +
   "Select a management option from the keyboard below 👇";
 
 let keyboard = [
@@ -53,7 +53,7 @@ let keyboard = [
 Api.sendMessage({
   chat_id: user.telegramid,
   text: text,
-  parse_mode: "Markdown",
+  parse_mode: "HTML",
   reply_markup: {
     keyboard: keyboard,
     resize_keyboard: true

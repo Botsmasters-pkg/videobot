@@ -12,8 +12,13 @@ CMD*/
 
 let primaryAdmin = 8710308658;
 if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) {
-  Bot.sendMessage("🚫 *Access Denied.*");
+  Bot.sendMessage("🚫 Access Denied.");
   return;
+}
+
+function esc(s) {
+  if (!s) return "";
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 if (!message && (!request || !request.message)) {
@@ -46,12 +51,11 @@ if (fwdChat) {
 } else if (mText.startsWith("@")) {
   channelUsername = mText;
   channelId = mText;
-  channelTitle = mText.replace("@", "");
+  channelTitle = mText;
 } else if (/^-?\d+$/.test(mText)) {
   channelId = mText;
-  channelTitle = "Channel (" + channelId + ")";
+  channelTitle = "Channel " + channelId;
 } else if (mText.indexOf("t.me/") > -1) {
-  // If user pasted a link instead
   let extracted = mText.replace(/.*t\.me\//, "").replace(/^\+/, "").replace(/\/.*$/, "").trim();
   if (extracted.startsWith("+")) {
     channelId = "Private Link";
@@ -59,10 +63,9 @@ if (fwdChat) {
   } else {
     channelUsername = "@" + extracted;
     channelId = channelUsername;
-    channelTitle = extracted;
+    channelTitle = channelUsername;
   }
 } else {
-  // Assume text is username or name
   channelTitle = mText;
   channelId = mText.startsWith("@") ? mText : ("@" + mText);
   channelUsername = channelId;
@@ -77,11 +80,11 @@ User.setProperty("fc_temp_ref", {
 User.setProperty("fc_state", "awaiting_type", "string");
 
 let text =
-  "➕ *ADD CHANNEL — Step 2 of 3*\n" +
+  "➕ <b>ADD CHANNEL — Step 2 of 3</b>\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "• 🏷 **Detected Name:** " + channelTitle + "\n" +
-  "• 🆔 **Detected ID:** `" + channelId + "`\n\n" +
-  "👉 Select the **Channel Type** using the keyboard below:\n" +
+  "• 🏷 <b>Detected Name:</b> " + esc(channelTitle) + "\n" +
+  "• 🆔 <b>Detected ID:</b> <code>" + esc(channelId) + "</code>\n\n" +
+  "👉 Select the <b>Channel Type</b> using the keyboard below:\n" +
   "━━━━━━━━━━━━━━━━━━━━━";
 
 let keyboard = [
@@ -100,7 +103,7 @@ let keyboard = [
 Api.sendMessage({
   chat_id: user.telegramid,
   text: text,
-  parse_mode: "Markdown",
+  parse_mode: "HTML",
   reply_markup: {
     keyboard: keyboard,
     resize_keyboard: true
@@ -108,4 +111,3 @@ Api.sendMessage({
 });
 
 Bot.run({ command: "/admin_fc_step2" });
-

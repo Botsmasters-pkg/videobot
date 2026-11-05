@@ -12,7 +12,7 @@ CMD*/
 
 let primaryAdmin = 8710308658;
 if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) {
-  Bot.sendMessage("🚫 *Access Denied.*");
+  Bot.sendMessage("🚫 Access Denied.");
   return;
 }
 
@@ -30,11 +30,17 @@ if (mText === "❌ Cancel" || mText === "🔴 Cancel" || mText === "/admin") {
 // URL Validation
 let joinUrl = mText;
 if (!joinUrl.includes("t.me") && !joinUrl.includes("telegram.me")) {
-  Bot.sendMessage(
-    "⚠️ *Invalid Telegram Join URL!*\n\n" +
-    "Please send a valid Telegram link (e.g. `https://t.me/example` or `https://t.me/+AbCdEf`):\n\n" +
-    "_(Or tap ❌ Cancel below)_"
-  );
+  let keyboard = [
+    [
+      { text: "❌ Cancel", style: "danger" }
+    ]
+  ];
+  Api.sendMessage({
+    chat_id: user.telegramid,
+    text: "⚠️ <b>Invalid Telegram Join URL!</b>\n\nPlease send a valid Telegram link (e.g. <code>https://t.me/example</code>):\n\n<i>(Or tap ❌ Cancel below)</i>",
+    parse_mode: "HTML",
+    reply_markup: { keyboard: keyboard, resize_keyboard: true }
+  });
   Bot.run({ command: "/admin_fc_step3" });
   return;
 }
@@ -77,7 +83,6 @@ User.setProperty("fc_temp_ref", null, "json");
 User.setProperty("fc_temp_type", null, "string");
 User.setProperty("fc_state", null, "string");
 
-Bot.sendMessage("✅ *Force Join channel added successfully.*");
+Bot.sendMessage("✅ <b>Force Join channel added successfully.</b>", { parse_mode: "HTML" });
 
 Bot.runCommand("/admin_channels");
-

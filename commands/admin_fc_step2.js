@@ -12,7 +12,7 @@ CMD*/
 
 let primaryAdmin = 8710308658;
 if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) {
-  Bot.sendMessage("🚫 *Access Denied.*");
+  Bot.sendMessage("🚫 Access Denied.");
   return;
 }
 
@@ -36,7 +36,24 @@ if (mText.indexOf("Private") > -1) {
   channelType = "public";
 } else {
   // Invalid selection, prompt again
-  Bot.sendMessage("⚠️ Please select a valid channel type using the keyboard below:");
+  let keyboard = [
+    [
+      { text: "⚪ Public", style: "primary" },
+      { text: "⚪ Private", style: "primary" }
+    ],
+    [
+      { text: "⚪ Join Request", style: "primary" }
+    ],
+    [
+      { text: "❌ Cancel", style: "danger" }
+    ]
+  ];
+  Api.sendMessage({
+    chat_id: user.telegramid,
+    text: "⚠️ <b>Please select a valid channel type:</b>",
+    parse_mode: "HTML",
+    reply_markup: { keyboard: keyboard, resize_keyboard: true }
+  });
   Bot.run({ command: "/admin_fc_step2" });
   return;
 }
@@ -49,13 +66,13 @@ if (channelType === "private") typeLabel = "Private Channel";
 if (channelType === "request") typeLabel = "Join Request Channel";
 
 let text =
-  "➕ *ADD CHANNEL — Step 3 of 3*\n" +
+  "➕ <b>ADD CHANNEL — Step 3 of 3</b>\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "• 📌 **Selected Type:** *" + typeLabel + "*\n\n" +
-  "👉 Now, send the **Join URL** for this channel:\n" +
-  "_(e.g. `https://t.me/example` or `https://t.me/+AbCdEfGh` or `https://t.me/+joinchat/...`)_\n" +
+  "• 📌 <b>Selected Type:</b> <i>" + typeLabel + "</i>\n\n" +
+  "👉 Now, send the <b>Join URL</b> for this channel:\n" +
+  "<i>(e.g. <code>https://t.me/example</code> or <code>https://t.me/+AbCdEfGh</code>)</i>\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "_(Or tap ❌ Cancel below)_";
+  "<i>(Or tap ❌ Cancel below)</i>";
 
 let keyboard = [
   [
@@ -66,7 +83,7 @@ let keyboard = [
 Api.sendMessage({
   chat_id: user.telegramid,
   text: text,
-  parse_mode: "Markdown",
+  parse_mode: "HTML",
   reply_markup: {
     keyboard: keyboard,
     resize_keyboard: true
@@ -74,4 +91,3 @@ Api.sendMessage({
 });
 
 Bot.run({ command: "/admin_fc_step3" });
-

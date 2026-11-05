@@ -12,8 +12,13 @@ CMD*/
 
 let primaryAdmin = 8710308658;
 if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) {
-  Bot.sendMessage("🚫 *Access Denied.*");
+  Bot.sendMessage("🚫 Access Denied.");
   return;
+}
+
+function esc(s) {
+  if (!s) return "";
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 if (!message) {
@@ -30,7 +35,7 @@ if (mText === "❌ Cancel" || mText === "🔴 Cancel" || mText === "/admin") {
 let channels = Bot.getProperty("force_channels") || [];
 let target = null;
 
-// Check if admin clicked "1. Channel Name (-100...)" or entered number or chat ID
+// Match by number (e.g. "1. @TOXIC_ADMINN" or "1")
 let matchNum = mText.match(/^(\d+)\./);
 if (matchNum) {
   let idx = parseInt(matchNum[1]) - 1;
@@ -38,14 +43,14 @@ if (matchNum) {
 } else if (/^\d+$/.test(mText) && parseInt(mText) <= channels.length && parseInt(mText) > 0) {
   target = channels[parseInt(mText) - 1];
 } else {
-  // Search by Chat ID or ID
+  // Search by Chat ID, username, or title
   for (let i = 0; i < channels.length; i++) {
     let c = channels[i];
     if (
       String(c.chat_id) === mText ||
       String(c.id) === mText ||
       (c.username && c.username.toLowerCase() === mText.toLowerCase()) ||
-      (c.title && mText.includes(c.title))
+      (c.title && mText.toLowerCase().includes(c.title.toLowerCase()))
     ) {
       target = c;
       break;
@@ -54,7 +59,21 @@ if (matchNum) {
 }
 
 if (!target) {
-  Bot.sendMessage("⚠️ *Channel not found.* Please tap one of the channel buttons below:");
+  // Re-build selection keyboard so admin doesn't lose buttons
+  let keyboardRows = [];
+  for (let i = 0; i < channels.length; i++) {
+    let ch = channels[i];
+    let cleanTitle = ch.title || ("Channel " + (ch.chat_id || ch.id));
+    keyboardRows.push([{ text: (i + 1) + ". " + cleanTitle, style: "primary" }]);
+  }
+  keyboardRows.push([{ text: "❌ Cancel", style: "danger" }]);
+
+  Api.sendMessage({
+    chat_id: user.telegramid,
+    text: "⚠️ <b>Channel not recognized.</b> Please tap a channel button below:",
+    parse_mode: "HTML",
+    reply_markup: { keyboard: keyboardRows, resize_keyboard: true }
+  });
   Bot.run({ command: "/admin_fc_confirm_del" });
   return;
 }
@@ -66,15 +85,15 @@ if (target.type === "private") typeStr = "Private";
 if (target.type === "request") typeStr = "Join Request";
 
 let text =
-  "⚠️ *CONFIRM REMOVE CHANNEL*\n" +
+  "⚠️ <b>CONFIRM REMOVE CHANNEL</b>\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
   "Are you sure you want to remove this channel?\n\n" +
-  "• **Name:** " + (target.title || "Channel") + "\n" +
-  "• **Type:** " + typeStr + "\n" +
-  "• **Chat ID:** `" + (target.chat_id || target.id) + "`\n" +
-  "• **Link:** " + (target.invite_link || "N/A") + "\n" +
+  "• <b>Name:</b> " + esc(target.title || "Channel") + "\n" +
+  "• <b>Type:</b> " + typeStr + "\n" +
+  "• <b>Chat ID:</b> <code>" + esc(target.chat_id || target.id) + "</code>\n" +
+  "• <b>Link:</b> " + esc(target.invite_link || "N/A") + "\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "Confirm your action below 👇";
+  "Confirm your action using the buttons below 👇";
 
 let keyboard = [
   [
@@ -86,7 +105,7 @@ let keyboard = [
 Api.sendMessage({
   chat_id: user.telegramid,
   text: text,
-  parse_mode: "Markdown",
+  parse_mode: "HTML",
   reply_markup: {
     keyboard: keyboard,
     resize_keyboard: true
@@ -94,4 +113,3 @@ Api.sendMessage({
 });
 
 Bot.run({ command: "/admin_fc_do_del" });
-

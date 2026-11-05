@@ -12,7 +12,7 @@ CMD*/
 
 let primaryAdmin = 8710308658;
 if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) {
-  Bot.sendMessage("🚫 *Access Denied.*");
+  Bot.sendMessage("🚫 Access Denied.");
   return;
 }
 
@@ -20,15 +20,15 @@ User.setProperty("in_fc_menu", true, "boolean");
 User.setProperty("fc_state", "awaiting_ref", "string");
 
 let text =
-  "➕ *ADD CHANNEL — Step 1 of 3*\n" +
+  "➕ <b>ADD CHANNEL — Step 1 of 3</b>\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "Please provide the **channel reference**.\n\n" +
+  "Please provide the <b>channel reference</b>.\n\n" +
   "You can send any of the following:\n" +
-  "1. 📨 **Forwarded channel message** from the target channel\n" +
-  "2. 📢 **@channel_username** (e.g. `@MyMovieChannel`)\n" +
-  "3. 🆔 **Numeric Chat ID** (e.g. `-1001234567890`)\n" +
+  "1. 📨 <b>Forwarded message</b> from the target channel\n" +
+  "2. 📢 <b>@channel_username</b> (e.g. <code>@MyMovieChannel</code>)\n" +
+  "3. 🆔 <b>Numeric Chat ID</b> (e.g. <code>-1001234567890</code>)\n" +
   "━━━━━━━━━━━━━━━━━━━━━\n" +
-  "_(Or tap ❌ Cancel below)_";
+  "<i>(Or tap ❌ Cancel below)</i>";
 
 let keyboard = [
   [
@@ -39,7 +39,7 @@ let keyboard = [
 Api.sendMessage({
   chat_id: user.telegramid,
   text: text,
-  parse_mode: "Markdown",
+  parse_mode: "HTML",
   reply_markup: {
     keyboard: keyboard,
     resize_keyboard: true
@@ -47,4 +47,3 @@ Api.sendMessage({
 });
 
 Bot.run({ command: "/admin_fc_step1" });
-

@@ -12,7 +12,7 @@ CMD*/
 
 let primaryAdmin = 8710308658;
 if (user.telegramid != primaryAdmin && user.telegramid != String(primaryAdmin)) {
-  Bot.sendMessage("🚫 *Access Denied.*");
+  Bot.sendMessage("🚫 Access Denied.");
   return;
 }
 
@@ -22,15 +22,26 @@ if (!message) {
 }
 
 let mText = message.trim();
-if (mText === "🔴 Cancel" || mText === "❌ Cancel" || mText === "/admin") {
+if (mText === "🔴 Cancel" || mText === "❌ Cancel" || mText === "/admin" || mText === "Cancel") {
   User.setProperty("fc_pending_remove_id", null, "string");
-  Bot.sendMessage("❌ *Channel removal cancelled.*");
+  Bot.sendMessage("❌ <b>Channel removal cancelled.</b>", { parse_mode: "HTML" });
   Bot.runCommand("/admin_channels");
   return;
 }
 
 if (mText !== "🟢 Confirm Remove" && mText !== "Confirm Remove") {
-  Bot.sendMessage("⚠️ Please tap **🟢 Confirm Remove** or **🔴 Cancel**:");
+  let keyboard = [
+    [
+      { text: "🟢 Confirm Remove", style: "success" },
+      { text: "🔴 Cancel", style: "danger" }
+    ]
+  ];
+  Api.sendMessage({
+    chat_id: user.telegramid,
+    text: "⚠️ <b>Please tap 🟢 Confirm Remove or 🔴 Cancel below:</b>",
+    parse_mode: "HTML",
+    reply_markup: { keyboard: keyboard, resize_keyboard: true }
+  });
   Bot.run({ command: "/admin_fc_do_del" });
   return;
 }
@@ -66,7 +77,6 @@ if (removedChannel) {
   Bot.setProperty("force_channel_logs", logs, "json");
 }
 
-Bot.sendMessage("✅ *Force Join channel removed successfully.*");
+Bot.sendMessage("✅ <b>Force Join channel removed successfully.</b>", { parse_mode: "HTML" });
 
 Bot.runCommand("/admin_channels");
-
