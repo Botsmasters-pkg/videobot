@@ -30,6 +30,7 @@ if (isAdmin || isGlobalEnabled === false || activeChannels.length === 0) {
 // Reset missing channels and set pending action flag so verified user gets video directly
 User.setProperty("missing_channels", [], "json");
 User.setProperty("pending_video_request", true, "boolean");
+User.setProperty("pending_start_dashboard", false, "boolean");
 
 // Start step-by-step real-time verification from channel 0
 Bot.runCommand("/verify_step 0");

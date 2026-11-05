@@ -119,7 +119,7 @@ if (typeof Bot !== "undefined") {
   }
 }
 
-// 0. Intercept Telegram Chat Join Requests (Unconditional for all updates)
+// 0a. Intercept Telegram Chat Join Requests (Unconditional for all updates)
 if (request && request.chat_join_request) {
   let reqChat = request.chat_join_request.chat;
   let reqFrom = request.chat_join_request.from;
@@ -132,6 +132,54 @@ if (request && request.chat_join_request) {
     let numId = reqChatId.replace("-100", "").replace("-", "");
     Bot.setProperty("user_pending_req_" + reqUserId + "_" + numId, true, "boolean");
     Bot.setProperty("user_pending_req_" + reqUserId, true, "boolean");
+
+    // Clear left flag if user re-requested
+    Bot.setProperty("user_left_chan_" + reqUserId + "_" + reqChatId, false, "boolean");
+    Bot.setProperty("user_left_chan_" + reqUserId + "_" + reqChatId.replace("-100", "-"), false, "boolean");
+    if (numId) {
+      Bot.setProperty("user_left_chan_" + reqUserId + "_" + numId, false, "boolean");
+    }
+    Bot.setProperty("user_left_any_" + reqUserId, false, "boolean");
+  }
+  return;
+}
+
+// 0b. Intercept Telegram Chat Member Updates (Detect when user leaves/is removed from channel)
+if (request && request.chat_member) {
+  let cm = request.chat_member;
+  let cmFrom = (cm.new_chat_member && cm.new_chat_member.user) || cm.from || cm.user;
+  let cmChat = cm.chat;
+  let newStatus = cm.new_chat_member ? cm.new_chat_member.status : null;
+
+  if (cmFrom && cmChat) {
+    let uId = cmFrom.id.toString();
+    let cId = cmChat.id.toString();
+    let numId = cId.replace("-100", "").replace("-", "");
+
+    if (newStatus === "left" || newStatus === "kicked") {
+      // User left channel! Invalidate verification immediately!
+      Bot.setProperty("user_pending_req_" + uId + "_" + cId, false, "boolean");
+      Bot.setProperty("user_pending_req_" + uId + "_" + cId.replace("-100", "-"), false, "boolean");
+      if (numId) {
+        Bot.setProperty("user_pending_req_" + uId + "_" + numId, false, "boolean");
+      }
+      Bot.setProperty("user_pending_req_" + uId, false, "boolean");
+
+      Bot.setProperty("user_left_chan_" + uId + "_" + cId, true, "boolean");
+      Bot.setProperty("user_left_chan_" + uId + "_" + cId.replace("-100", "-"), true, "boolean");
+      if (numId) {
+        Bot.setProperty("user_left_chan_" + uId + "_" + numId, true, "boolean");
+      }
+      Bot.setProperty("user_left_any_" + uId, true, "boolean");
+    } else if (newStatus === "member" || newStatus === "administrator" || newStatus === "creator") {
+      // User rejoined or is active member
+      Bot.setProperty("user_left_chan_" + uId + "_" + cId, false, "boolean");
+      Bot.setProperty("user_left_chan_" + uId + "_" + cId.replace("-100", "-"), false, "boolean");
+      if (numId) {
+        Bot.setProperty("user_left_chan_" + uId + "_" + numId, false, "boolean");
+      }
+      Bot.setProperty("user_left_any_" + uId, false, "boolean");
+    }
   }
   return;
 }
@@ -370,6 +418,9 @@ if (user) {
       }
 
       if (activeChannels.length > 0) {
+        if (Bot.getProperty("user_left_any_" + user.telegramid)) {
+          User.setProperty("channels_verified", false, "boolean");
+        }
         let isVerified = User.getProperty("channels_verified");
         if (!isVerified) {
           // Identify incoming command / callback
@@ -382,17 +433,10 @@ if (user) {
             currentCmd = request.message.text.trim();
           }
 
-          // Preserve referral parameters if user started via referral link
-          if (currentCmd.indexOf("/start") === 0) {
-            let refParam = currentCmd.replace("/start", "").trim();
-            if (refParam) {
-              User.setProperty("pending_ref_param", refParam, "string");
-            }
-          }
-
-          // Allow channel verification, video delivery, and bot clone transfer commands
+          // Allow channel verification, start (which has its own channel check), video delivery, and clone commands
           let isVerifyCmd = false;
           let allowedPrefixes = [
+            "/start",
             "/verify_step",
             "/on_verify_step_res",
             "/on_verify_step_err",
@@ -422,14 +466,22 @@ if (user) {
           }
 
           if (!isVerifyCmd) {
-            let buttons = [];
+            let chanBtns = [];
             for (let i = 0; i < activeChannels.length; i++) {
               let ch = activeChannels[i];
-              let cleanName = (ch.title || "").replace(/^@/, "").replace(/^Private Channel \([^)]*\)/, "Private Channel").replace(/^Request Channel \([^)]*\)/, "Request Channel").trim() || "Official Channel";
               let link = ch.invite_link || (ch.username ? "https://t.me/" + ch.username.replace("@", "") : "");
               if (link) {
-                // Button title is ONLY the channel name!
-                buttons.push([{ title: cleanName, url: link, style: "primary" }]);
+                chanBtns.push({ title: "𝗝𝗢𝗜𝗡", url: link, style: "primary" });
+              }
+            }
+
+            // 2x2 Layout (2 buttons per row)
+            let buttons = [];
+            for (let i = 0; i < chanBtns.length; i += 2) {
+              if (i + 1 < chanBtns.length) {
+                buttons.push([chanBtns[i], chanBtns[i + 1]]);
+              } else {
+                buttons.push([chanBtns[i]]);
               }
             }
             buttons.push([{ title: "🔄 Verify Membership", command: "/verify_step 0", style: "primary" }]);
@@ -446,7 +498,7 @@ if (user) {
             }
 
             joinText +=
-              "\n👉 *Step 1:* Click each channel button above to join.\n" +
+              "\n👉 *Step 1:* Click **𝗝𝗢𝗜𝗡** buttons above to join.\n" +
               "👉 *Step 2:* Tap *🔄 Verify Membership* below once you've joined.\n" +
               "━━━━━━━━━━━━━━━━━━━━━";
 

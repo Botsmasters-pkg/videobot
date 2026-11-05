@@ -27,8 +27,8 @@ let status = res ? res.status : null;
 let isMember = (status === "creator" || status === "administrator" || status === "member" || status === "restricted");
 
 if (!isMember) {
-  if (ch && ch.type !== "request") {
-    // Flag this public/private channel as missing!
+  if (ch) {
+    // Flag this channel as missing!
     let missing = User.getProperty("missing_channels") || [];
     let alreadyAdded = false;
     for (let m = 0; m < missing.length; m++) {
@@ -46,4 +46,3 @@ if (!isMember) {
 
 // Proceed to verify next channel
 Bot.runCommand("/verify_step " + (index + 1));
-

@@ -22,8 +22,8 @@ for (let i = 0; i < channels.length; i++) {
 
 let ch = activeChannels[index];
 
-if (ch && ch.type !== "request") {
-  // If Telegram returns user not found or forbidden on public/private channel, flag as missing
+if (ch) {
+  // If Telegram returns user not found or forbidden, flag as missing
   let missing = User.getProperty("missing_channels") || [];
   let alreadyAdded = false;
   for (let m = 0; m < missing.length; m++) {
@@ -40,4 +40,3 @@ if (ch && ch.type !== "request") {
 
 // Move to next channel
 Bot.runCommand("/verify_step " + (index + 1));
-
