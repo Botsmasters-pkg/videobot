@@ -69,3 +69,4 @@ if (removedChannel) {
 Bot.sendMessage("✅ *Force Join channel removed successfully.*");
 
 Bot.runCommand("/admin_channels");
+

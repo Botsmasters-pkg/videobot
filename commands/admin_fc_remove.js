@@ -53,3 +53,4 @@ Api.sendMessage({
 });
 
 Bot.run({ command: "/admin_fc_confirm_del" });
+

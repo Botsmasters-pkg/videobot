@@ -89,3 +89,4 @@ Bot.sendMessage(
 );
 
 Bot.runCommand("/admin_channels");
+
