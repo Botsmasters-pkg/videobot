@@ -45,3 +45,4 @@ Api.sendMessage({
   on_result: "/on_new_storage_verified",
   on_error: "/on_new_storage_failed"
 });
+

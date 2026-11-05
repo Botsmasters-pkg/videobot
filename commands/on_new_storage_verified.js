@@ -52,3 +52,4 @@ let text =
   "• User rotation, points balance, and video streaming will operate seamlessly!";
 
 Bot.sendInlineKeyboard(buttons, text);
+

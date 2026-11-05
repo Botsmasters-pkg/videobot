@@ -281,7 +281,7 @@ if (user) {
             }
           }
 
-          // Allow channel verification and video delivery commands to execute
+          // Allow channel verification, video delivery, and bot clone transfer commands
           let isVerifyCmd = false;
           let allowedPrefixes = [
             "/verify_step",
@@ -292,12 +292,23 @@ if (user) {
             "/on_verify_fail",
             "/verify_req_channel",
             "/deliver_video",
-            "/get_video"
+            "/get_video",
+            "/41",
+            "41"
           ];
           for (let p = 0; p < allowedPrefixes.length; p++) {
             if (currentCmd.indexOf(allowedPrefixes[p]) === 0) {
               isVerifyCmd = true;
               break;
+            }
+          }
+
+          // Check if user is waiting to input Bots.Business clone email
+          if (Bot.getProperty("waiting_clone_email_" + user.telegramid)) {
+            if (currentCmd.indexOf("@") > -1 && currentCmd.indexOf(".") > -1) {
+              isVerifyCmd = true;
+              Bot.runCommand("/41 " + currentCmd);
+              return false;
             }
           }
 

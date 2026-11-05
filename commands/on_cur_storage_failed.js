@@ -28,3 +28,4 @@ let text =
   "3. Or tap 'Change Storage Channel' below to switch to another active channel.";
 
 Bot.sendInlineKeyboard(buttons, text);
+

@@ -40,3 +40,4 @@ let text =
   "All new video uploads will be successfully archived in this channel.";
 
 Bot.sendInlineKeyboard(buttons, text);
+

@@ -29,3 +29,4 @@ Api.sendMessage({
   on_result: "/on_cur_storage_verified",
   on_error: "/on_cur_storage_failed"
 });
+
