@@ -120,7 +120,6 @@ let welcomeText =
   "━━━━━━━━━━━━━━━━━━━━━\n" +
   "📌 *How it works:*\n" +
   "• 🎁 *First 2 Videos FREE:* Tap 'Get Video' to watch 2 free videos!\n" +
-  "• 🎬 *After 2 Videos:* Only *5 Points* per video.\n" +
   "• 👥 *Refer & Earn:* Invite friends to get *10 Points per referral*!\n" +
   "• 💳 *Buy Points:* Instant UPI starting at *₹10 = 100 Points*.\n\n" +
   "Tap *🎬 Get Video* below to get your video 👇";
