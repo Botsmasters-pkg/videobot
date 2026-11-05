@@ -55,39 +55,58 @@ if (!isRegistered) {
     Bot.setProperty("storage_channel_id", "-1003856912131", "string");
   }
 
-  // Handle Referral: save referrer ID on user to be awarded upon channel verification
-  if (params && params !== "dashboard") {
+  // Handle Referral
+  if (params) {
     let cleanParam = params.toString().replace("ref_", "").replace("ref", "").trim();
     let refId = parseInt(cleanParam);
     if (refId && refId != user.telegramid) {
-      User.setProperty("pending_referrer_id", refId, "integer");
-      User.setProperty("referrer_id", refId, "string");
+      let refEnabled = Bot.getProperty("referral_enabled");
+      if (refEnabled !== false) {
+        let refPoints = Bot.getProperty("points_per_referral") || 10;
+        let refCount = Bot.getProperty("ref_count_" + refId) || 0;
+        let newCount = refCount + 1;
+        Bot.setProperty("ref_count_" + refId, newCount, "integer");
+
+        let referrerPoints = Bot.getProperty("points_" + refId) || 0;
+        let newReferrerPoints = referrerPoints + refPoints;
+        Bot.setProperty("points_" + refId, newReferrerPoints, "integer");
+
+        let refPointsEarned = Bot.getProperty("ref_points_" + refId) || 0;
+        Bot.setProperty("ref_points_" + refId, refPointsEarned + refPoints, "integer");
+
+        let refList = Bot.getProperty("ref_list_" + refId) || [];
+        refList.push({
+          id: user.telegramid,
+          name: user.first_name || "Friend",
+          username: user.username || "",
+          date: new Date().toISOString()
+        });
+        Bot.setProperty("ref_list_" + refId, refList, "json");
+
+        User.setProperty("referrer_id", refId, "string");
+
+        let totalValid = Bot.getProperty("total_valid_referrals") || 0;
+        Bot.setProperty("total_valid_referrals", totalValid + 1, "integer");
+
+        let totalDist = Bot.getProperty("total_points_distributed") || 0;
+        Bot.setProperty("total_points_distributed", totalDist + refPoints, "integer");
+
+        try {
+          Bot.sendMessageToChatWithId(
+            refId,
+            "🎉 *New Referral Joined!*\n\n" +
+            "User *" + (user.first_name || "Friend") + "* joined using your link!\n" +
+            "• Total Referrals: *" + newCount + "*\n\n" +
+            "🎁 *+" + refPoints + " Points Credited!* (Your Balance: *" + newReferrerPoints + " Points*)\n\n" +
+            "Tap /my_points to view your balance or /get_video to watch videos!"
+          );
+        } catch (e) {}
+      }
     }
   }
 }
 
-// 3. Force Channel Verification Check on /start
-let isAdmin = (user.telegramid == 8710308658 || user.telegramid == "8710308658");
-let isGlobalEnabled = Bot.getProperty("force_channels_enabled");
-let channels = Bot.getProperty("force_channels") || [];
-let activeChannels = [];
-for (let i = 0; i < channels.length; i++) {
-  if (channels[i].enabled !== false) {
-    activeChannels.push(channels[i]);
-  }
-}
-
-let needVerify = (!isAdmin && isGlobalEnabled !== false && activeChannels.length > 0 && params !== "dashboard");
-
-if (needVerify) {
-  User.setProperty("missing_channels", [], "json");
-  User.setProperty("pending_video_request", false, "boolean");
-  User.setProperty("pending_start_dashboard", true, "boolean");
-  Bot.runCommand("/verify_step 0");
-  return;
-}
-
-// 4. Render Main Menu with Buttons
+// 3. Render Main Menu Dashboard Directly
 let buttons = [
   [
     { title: "🎬 Get Video", command: "/get_video", style: "primary" }

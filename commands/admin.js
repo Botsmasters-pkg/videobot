@@ -53,19 +53,18 @@ let buttons = [
     { title: "🎁 Referral Settings", command: "/admin_ref_settings", style: "primary" }
   ],
   [
-    { title: "📢 Force Channels", command: "/admin_channels", style: "primary" },
-    { title: "📦 Storage Channel", command: "/admin_storage_settings", style: "primary" }
+    { title: "📦 Storage Channel", command: "/admin_storage_settings", style: "primary" },
+    { title: "💬 Help Username Settings", command: "/admin_help_settings", style: "primary" }
   ],
   [
-    { title: "💬 Help Username Settings", command: "/admin_help_settings", style: "primary" },
-    { title: "🔍 User Points Lookup", command: "/admin_view_user_points", style: "primary" }
+    { title: "🔍 User Points Lookup", command: "/admin_view_user_points", style: "primary" },
+    { title: "📊 Global Statistics", command: "/admin_stats", style: "primary" }
   ],
   [
-    { title: "📊 Global Statistics", command: "/admin_stats", style: "primary" },
-    { title: "📢 Broadcast Message", command: "/admin_broadcast", style: "primary" }
+    { title: "📢 Broadcast Message", command: "/admin_broadcast", style: "primary" },
+    { title: "🚫 Ban/Unban User", command: "/admin_ban", style: "primary" }
   ],
   [
-    { title: "🚫 Ban/Unban User", command: "/admin_ban", style: "primary" },
     { title: "⚙️ Default Settings / Region", command: "/admin_default_settings", style: "primary" }
   ],
   [

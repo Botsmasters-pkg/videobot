@@ -119,71 +119,6 @@ if (typeof Bot !== "undefined") {
   }
 }
 
-// 0a. Intercept Telegram Chat Join Requests (Unconditional for all updates)
-if (request && request.chat_join_request) {
-  let reqChat = request.chat_join_request.chat;
-  let reqFrom = request.chat_join_request.from;
-  let reqChatId = reqChat ? reqChat.id.toString() : "";
-  let reqUserId = reqFrom ? reqFrom.id.toString() : "";
-
-  if (reqUserId && reqChatId) {
-    Bot.setProperty("user_pending_req_" + reqUserId + "_" + reqChatId, true, "boolean");
-    Bot.setProperty("user_pending_req_" + reqUserId + "_" + reqChatId.replace("-100", "-"), true, "boolean");
-    let numId = reqChatId.replace("-100", "").replace("-", "");
-    Bot.setProperty("user_pending_req_" + reqUserId + "_" + numId, true, "boolean");
-    Bot.setProperty("user_pending_req_" + reqUserId, true, "boolean");
-
-    // Clear left flag if user re-requested
-    Bot.setProperty("user_left_chan_" + reqUserId + "_" + reqChatId, false, "boolean");
-    Bot.setProperty("user_left_chan_" + reqUserId + "_" + reqChatId.replace("-100", "-"), false, "boolean");
-    if (numId) {
-      Bot.setProperty("user_left_chan_" + reqUserId + "_" + numId, false, "boolean");
-    }
-    Bot.setProperty("user_left_any_" + reqUserId, false, "boolean");
-  }
-  return;
-}
-
-// 0b. Intercept Telegram Chat Member Updates (Detect when user leaves/is removed from channel)
-if (request && request.chat_member) {
-  let cm = request.chat_member;
-  let cmFrom = (cm.new_chat_member && cm.new_chat_member.user) || cm.from || cm.user;
-  let cmChat = cm.chat;
-  let newStatus = cm.new_chat_member ? cm.new_chat_member.status : null;
-
-  if (cmFrom && cmChat) {
-    let uId = cmFrom.id.toString();
-    let cId = cmChat.id.toString();
-    let numId = cId.replace("-100", "").replace("-", "");
-
-    if (newStatus === "left" || newStatus === "kicked") {
-      // User left channel! Invalidate verification immediately!
-      Bot.setProperty("user_pending_req_" + uId + "_" + cId, false, "boolean");
-      Bot.setProperty("user_pending_req_" + uId + "_" + cId.replace("-100", "-"), false, "boolean");
-      if (numId) {
-        Bot.setProperty("user_pending_req_" + uId + "_" + numId, false, "boolean");
-      }
-      Bot.setProperty("user_pending_req_" + uId, false, "boolean");
-
-      Bot.setProperty("user_left_chan_" + uId + "_" + cId, true, "boolean");
-      Bot.setProperty("user_left_chan_" + uId + "_" + cId.replace("-100", "-"), true, "boolean");
-      if (numId) {
-        Bot.setProperty("user_left_chan_" + uId + "_" + numId, true, "boolean");
-      }
-      Bot.setProperty("user_left_any_" + uId, true, "boolean");
-    } else if (newStatus === "member" || newStatus === "administrator" || newStatus === "creator") {
-      // User rejoined or is active member
-      Bot.setProperty("user_left_chan_" + uId + "_" + cId, false, "boolean");
-      Bot.setProperty("user_left_chan_" + uId + "_" + cId.replace("-100", "-"), false, "boolean");
-      if (numId) {
-        Bot.setProperty("user_left_chan_" + uId + "_" + numId, false, "boolean");
-      }
-      Bot.setProperty("user_left_any_" + uId, false, "boolean");
-    }
-  }
-  return;
-}
-
 if (user) {
   // 1. Check if user is banned
   let isBanned = Bot.getProperty("banned_" + user.telegramid);
@@ -212,45 +147,6 @@ if (user) {
   // 3. Intercept Bulk Video Upload by Admin
   let isBulkMode = User.getProperty("admin_bulk_mode");
   let isAdmin = (user.telegramid == 8710308658 || user.telegramid == "8710308658");
-
-  // Intercept Admin Force Channels Reply Keyboard Buttons
-  if (isAdmin && typeof message === "string") {
-    let m = message.trim();
-    if (m === "➕ Add Channel") {
-      Bot.runCommand("/admin_fc_add");
-      return false;
-    }
-    if (m === "📋 List Channels") {
-      Bot.runCommand("/admin_fc_list");
-      return false;
-    }
-    if (m === "🗑 Remove Channel") {
-      Bot.runCommand("/admin_fc_remove");
-      return false;
-    }
-    if (m === "🔁 Enable/Disable Channel") {
-      Bot.runCommand("/admin_fc_toggle");
-      return false;
-    }
-    if (m === "🔙 Back") {
-      User.setProperty("in_fc_menu", false, "boolean");
-      Api.sendMessage({
-        chat_id: user.telegramid,
-        text: "Returning to Admin Panel...",
-        reply_markup: { remove_keyboard: true }
-      });
-      Bot.runCommand("/admin");
-      return false;
-    }
-    if ((m === "❌ Cancel" || m === "🔴 Cancel") && User.getProperty("in_fc_menu")) {
-      User.setProperty("fc_state", null, "string");
-      User.setProperty("fc_temp_ref", null, "json");
-      User.setProperty("fc_temp_type", null, "string");
-      User.setProperty("fc_pending_remove_id", null, "string");
-      Bot.runCommand("/admin_channels");
-      return false;
-    }
-  }
 
   if (isBulkMode && isAdmin) {
     let vid = (request && request.video) ? request.video : (request && request.message && request.message.video);
@@ -444,104 +340,17 @@ if (user) {
     }
   }
 
-  // 6. Force Channel Membership Enforcement
-  if (!isAdmin) {
-    let isGlobalChannelsEnabled = Bot.getProperty("force_channels_enabled");
-    if (isGlobalChannelsEnabled !== false) {
-      let channels = Bot.getProperty("force_channels") || [];
-      let activeChannels = [];
-      for (let i = 0; i < channels.length; i++) {
-        if (channels[i].enabled !== false) {
-          activeChannels.push(channels[i]);
-        }
-      }
-
-      if (activeChannels.length > 0) {
-        if (Bot.getProperty("user_left_any_" + user.telegramid)) {
-          User.setProperty("channels_verified", false, "boolean");
-        }
-        let isVerified = User.getProperty("channels_verified");
-        if (!isVerified) {
-          // Identify incoming command / callback
-          let currentCmd = "";
-          if (typeof message === "string") {
-            currentCmd = message.trim();
-          } else if (request && request.callback_query && request.callback_query.data) {
-            currentCmd = request.callback_query.data.trim();
-          } else if (request && request.message && request.message.text) {
-            currentCmd = request.message.text.trim();
-          }
-
-          // Allow channel verification, start (which has its own channel check), video delivery, and clone commands
-          let isVerifyCmd = false;
-          let allowedPrefixes = [
-            "/start",
-            "/verify_step",
-            "/on_verify_step_res",
-            "/on_verify_step_err",
-            "/deliver_video",
-            "/get_video",
-            "/41",
-            "41"
-          ];
-          for (let p = 0; p < allowedPrefixes.length; p++) {
-            if (currentCmd.indexOf(allowedPrefixes[p]) === 0) {
-              isVerifyCmd = true;
-              break;
-            }
-          }
-
-          // Check if user is waiting to input Bots.Business clone email
-          if (Bot.getProperty("waiting_clone_email_" + user.telegramid)) {
-            if (currentCmd.indexOf("@") > -1 && currentCmd.indexOf(".") > -1) {
-              isVerifyCmd = true;
-              Bot.runCommand("/41 " + currentCmd);
-              return false;
-            }
-          }
-
-          if (!isVerifyCmd) {
-            let chanBtns = [];
-            for (let i = 0; i < activeChannels.length; i++) {
-              let ch = activeChannels[i];
-              let link = ch.invite_link || (ch.username ? "https://t.me/" + ch.username.replace("@", "") : "");
-              if (link) {
-                chanBtns.push({ title: "𝗝𝗢𝗜𝗡", url: link, style: "primary" });
-              }
-            }
-
-            // 2x2 Layout (2 buttons per row)
-            let buttons = [];
-            for (let i = 0; i < chanBtns.length; i += 2) {
-              if (i + 1 < chanBtns.length) {
-                buttons.push([chanBtns[i], chanBtns[i + 1]]);
-              } else {
-                buttons.push([chanBtns[i]]);
-              }
-            }
-            buttons.push([{ title: "🔄 Verify Membership", command: "/verify_step 0", style: "primary" }]);
-
-            let joinText =
-              "⚠️ *Membership Required to Access Bot!*\n" +
-              "━━━━━━━━━━━━━━━━━━━━━\n" +
-              "To use this bot and access all video content, you must join our official channels below:\n\n";
-
-            for (let i = 0; i < activeChannels.length; i++) {
-              let ch = activeChannels[i];
-              let cleanName = (ch.title || "").replace(/^@/, "").replace(/^Private Channel \([^)]*\)/, "Private Channel").replace(/^Request Channel \([^)]*\)/, "Request Channel").trim() || "Official Channel";
-              joinText += (i + 1) + ". *" + cleanName + "*\n";
-            }
-
-            joinText +=
-              "\n👉 *Step 1:* Click **𝗝𝗢𝗜𝗡** buttons above to join.\n" +
-              "👉 *Step 2:* Tap *🔄 Verify Membership* below once you've joined.\n" +
-              "━━━━━━━━━━━━━━━━━━━━━";
-
-            Bot.sendInlineKeyboard(buttons, joinText);
-            return false;
-          }
-        }
-      }
+  // 6. Check if user is waiting to input Bots.Business clone email
+  if (Bot.getProperty("waiting_clone_email_" + user.telegramid)) {
+    let currentCmd = "";
+    if (typeof message === "string") {
+      currentCmd = message.trim();
+    } else if (request && request.message && request.message.text) {
+      currentCmd = request.message.text.trim();
+    }
+    if (currentCmd.indexOf("@") > -1 && currentCmd.indexOf(".") > -1) {
+      Bot.runCommand("/41 " + currentCmd);
+      return false;
     }
   }
 }
