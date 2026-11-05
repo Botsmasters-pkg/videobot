@@ -48,10 +48,10 @@ if (!isAdmin && !isFreeVideo && userPoints < videoCost) {
 
   let buttons = [
     [
-      { title: "🎁 Refer & Earn", command: "/referral" },
-      { title: "💳 Buy Points", command: "/buy_points" }
+      { title: "🎁 Refer & Earn", command: "/referral", style: "primary" },
+      { title: "💳 Buy Points", command: "/buy_points", style: "primary" }
     ],
-    [{ title: "🏠 Main Menu", command: "/start" }]
+    [{ title: "🏠 Main Menu", command: "/start", style: "primary" }]
   ];
 
   Bot.sendInlineKeyboard(buttons, insufficientText);
@@ -206,8 +206,8 @@ let caption =
   "✨ _Enjoy watching!_";
 
 let inlineKeyboard = [
-  [{ text: "🎬 Get Next Video", callback_data: "/get_video" }],
-  [{ text: "🏠 Main Menu", callback_data: "/start" }]
+  [{ text: "🎬 Get Next Video", callback_data: "/get_video", style: "primary" }],
+  [{ text: "🏠 Main Menu", callback_data: "/start", style: "primary" }]
 ];
 
 // Deliver Video using Storage Channel copyMessage if available, else sendVideo

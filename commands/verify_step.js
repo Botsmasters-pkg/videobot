@@ -79,13 +79,13 @@ if (index >= activeChannels.length) {
     let cleanName = (m.title || "").replace(/^@/, "").replace(/^Private Channel \([^)]*\)/, "Private Channel").replace(/^Request Channel \([^)]*\)/, "Request Channel").trim() || "Official Channel";
     let link = m.invite_link || (m.username ? "https://t.me/" + m.username.replace("@", "") : "");
     if (link) {
-      buttons.push([{ title: cleanName, url: link }]);
+      buttons.push([{ title: cleanName, url: link, style: "primary" }]);
     }
   }
 
   // Verification action buttons
-  buttons.push([{ title: "🔄 Verify Membership", command: "/verify_step 0" }]);
-  buttons.push([{ title: "🏠 Main Menu", command: "/start" }]);
+  buttons.push([{ title: "🔄 Verify Membership", command: "/verify_step 0", style: "primary" }]);
+  buttons.push([{ title: "🏠 Main Menu", command: "/start", style: "primary" }]);
 
   let text =
     "⚠️ *Channel Membership Required!*\n" +

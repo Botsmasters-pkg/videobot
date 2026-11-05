@@ -82,9 +82,9 @@ let caption =
   "━━━━━━━━━━━━━━━━━━━━━";
 
 let inlineKeyboard = [
-  [{ text: "✅ I Have Paid", callback_data: "/i_have_paid" }],
-  [{ text: "❌ Cancel Order", callback_data: "/cancel_payment" }],
-  [{ text: "🔙 Choose Another Package", callback_data: "/buy_points" }]
+  [{ text: "✅ I Have Paid", callback_data: "/i_have_paid", style: "primary" }],
+  [{ text: "❌ Cancel Order", callback_data: "/cancel_payment", style: "primary" }],
+  [{ text: "🔙 Choose Another Package", callback_data: "/buy_points", style: "primary" }]
 ];
 
 Api.sendPhoto({

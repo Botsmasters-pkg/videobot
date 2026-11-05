@@ -44,12 +44,12 @@ let shareUrl =
   encodeURIComponent(shareText);
 
 let buttons = [
-  [{ title: "📤 Share Referral Link", url: shareUrl }],
+  [{ title: "📤 Share Referral Link", url: shareUrl, style: "primary" }],
   [
-    { title: "💰 My Points", command: "/my_points" },
-    { title: "🎬 Get Video", command: "/get_video" }
+    { title: "💰 My Points", command: "/my_points", style: "primary" },
+    { title: "🎬 Get Video", command: "/get_video", style: "primary" }
   ],
-  [{ title: "🏠 Main Menu", command: "/start" }]
+  [{ title: "🏠 Main Menu", command: "/start", style: "primary" }]
 ];
 
 Bot.sendInlineKeyboard(buttons, text);

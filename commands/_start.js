@@ -120,21 +120,21 @@ if (!isRegistered) {
 // 3. Render Main Menu with Buttons
 let buttons = [
   [
-    { title: "🎬 Get Video", command: "/get_video" }
+    { title: "🎬 Get Video", command: "/get_video", style: "primary" }
   ],
   [
-    { title: "💰 My Points", command: "/my_points" },
-    { title: "🎁 Refer & Earn", command: "/referral" }
+    { title: "💰 My Points", command: "/my_points", style: "primary" },
+    { title: "🎁 Refer & Earn", command: "/referral", style: "primary" }
   ],
   [
-    { title: "💳 Buy Points", command: "/buy_points" },
-    { title: "ℹ️ Help", command: "/help" }
+    { title: "💳 Buy Points", command: "/buy_points", style: "primary" },
+    { title: "ℹ️ Help", command: "/help", style: "primary" }
   ]
 ];
 
 // Show Admin button only for authorized admin 8710308658
 if (user.telegramid == 8710308658 || user.telegramid == "8710308658") {
-  buttons.push([{ title: "🛠 Open Admin Panel", command: "/admin" }]);
+  buttons.push([{ title: "🛠 Open Admin Panel", command: "/admin", style: "primary" }]);
 }
 
 let freeUsed = User.getProperty("free_videos_used") || 0;

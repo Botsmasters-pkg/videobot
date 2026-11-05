@@ -25,12 +25,12 @@ let text =
   "Tap an option below 👇";
 
 let buttons = [
-  [{ title: "💬 Contact Admin", command: "/contact_admin" }],
+  [{ title: "💬 Contact Admin", command: "/contact_admin", style: "primary" }],
   [
-    { title: "🎁 Refer & Earn", command: "/referral" },
-    { title: "💳 Buy Points", command: "/buy_points" }
+    { title: "🎁 Refer & Earn", command: "/referral", style: "primary" },
+    { title: "💳 Buy Points", command: "/buy_points", style: "primary" }
   ],
-  [{ title: "🏠 Main Menu", command: "/start" }]
+  [{ title: "🏠 Main Menu", command: "/start", style: "primary" }]
 ];
 
 Bot.sendInlineKeyboard(buttons, text);

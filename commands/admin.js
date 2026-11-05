@@ -33,43 +33,43 @@ let paymentBadge = pendingPayments > 0 ? " (" + pendingPayments + " Pending!)" :
 
 let buttons = [
   [
-    { title: "📤 Single Video Upload", command: "/admin_upload" },
-    { title: "📦 Bulk Video Upload", command: "/admin_bulk_upload" }
+    { title: "📤 Single Video Upload", command: "/admin_upload", style: "primary" },
+    { title: "📦 Bulk Video Upload", command: "/admin_bulk_upload", style: "primary" }
   ],
   [
-    { title: "📋 Manage Videos (" + videos.length + ")", command: "/admin_manage_vids" },
-    { title: "📂 Manage Categories", command: "/admin_edit_cat" }
+    { title: "📋 Manage Videos (" + videos.length + ")", command: "/admin_manage_vids", style: "primary" },
+    { title: "📂 Manage Categories", command: "/admin_edit_cat", style: "primary" }
   ],
   [
-    { title: "💳 Payments" + paymentBadge, command: "/admin_payments" },
-    { title: "📱 UPI & QR Settings", command: "/admin_upi_settings" }
+    { title: "💳 Payments" + paymentBadge, command: "/admin_payments", style: "primary" },
+    { title: "📱 UPI & QR Settings", command: "/admin_upi_settings", style: "primary" }
   ],
   [
-    { title: "🏷 Pricing Packages", command: "/admin_pricing" },
-    { title: "💰 Points Management", command: "/admin_points_menu" }
+    { title: "🏷 Pricing Packages", command: "/admin_pricing", style: "primary" },
+    { title: "💰 Points Management", command: "/admin_points_menu", style: "primary" }
   ],
   [
-    { title: "🎬 Video Cost Points", command: "/admin_set_vid_points" },
-    { title: "🎁 Referral Settings", command: "/admin_ref_settings" }
+    { title: "🎬 Video Cost Points", command: "/admin_set_vid_points", style: "primary" },
+    { title: "🎁 Referral Settings", command: "/admin_ref_settings", style: "primary" }
   ],
   [
-    { title: "📢 Force Channels", command: "/admin_channels" },
-    { title: "📦 Storage Channel", command: "/admin_storage_settings" }
+    { title: "📢 Force Channels", command: "/admin_channels", style: "primary" },
+    { title: "📦 Storage Channel", command: "/admin_storage_settings", style: "primary" }
   ],
   [
-    { title: "💬 Help Username Settings", command: "/admin_help_settings" },
-    { title: "🔍 User Points Lookup", command: "/admin_view_user_points" }
+    { title: "💬 Help Username Settings", command: "/admin_help_settings", style: "primary" },
+    { title: "🔍 User Points Lookup", command: "/admin_view_user_points", style: "primary" }
   ],
   [
-    { title: "📊 Global Statistics", command: "/admin_stats" },
-    { title: "📢 Broadcast Message", command: "/admin_broadcast" }
+    { title: "📊 Global Statistics", command: "/admin_stats", style: "primary" },
+    { title: "📢 Broadcast Message", command: "/admin_broadcast", style: "primary" }
   ],
   [
-    { title: "🚫 Ban/Unban User", command: "/admin_ban" },
-    { title: "⚙️ Default Settings / Region", command: "/admin_default_settings" }
+    { title: "🚫 Ban/Unban User", command: "/admin_ban", style: "primary" },
+    { title: "⚙️ Default Settings / Region", command: "/admin_default_settings", style: "primary" }
   ],
   [
-    { title: "🔙 Back to User Panel", command: "/start" }
+    { title: "🔙 Back to User Panel", command: "/start", style: "primary" }
   ]
 ];
 

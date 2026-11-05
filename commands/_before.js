@@ -10,6 +10,115 @@ aliases:
 group: 
 CMD*/
 
+// ===== GLOBAL PRIMARY BUTTON STYLE ENFORCER =====
+// Enforces Telegram Bot API "style": "primary" on ALL inline keyboards across the bot
+function _enforcePrimaryStyle(replyMarkup) {
+  if (replyMarkup && Array.isArray(replyMarkup.inline_keyboard)) {
+    for (let r = 0; r < replyMarkup.inline_keyboard.length; r++) {
+      let row = replyMarkup.inline_keyboard[r];
+      if (Array.isArray(row)) {
+        for (let b = 0; b < row.length; b++) {
+          if (row[b] && typeof row[b] === "object") {
+            if (!row[b].style) {
+              row[b].style = "primary";
+            }
+          }
+        }
+      }
+    }
+  }
+  return replyMarkup;
+}
+
+if (typeof Api !== "undefined") {
+  if (Api.sendMessage && !Api._origSendMessage) {
+    Api._origSendMessage = Api.sendMessage;
+    Api.sendMessage = function(p) {
+      if (p && p.reply_markup) {
+        _enforcePrimaryStyle(p.reply_markup);
+      }
+      return Api._origSendMessage(p);
+    };
+  }
+  if (Api.sendVideo && !Api._origSendVideo) {
+    Api._origSendVideo = Api.sendVideo;
+    Api.sendVideo = function(p) {
+      if (p && p.reply_markup) {
+        _enforcePrimaryStyle(p.reply_markup);
+      }
+      return Api._origSendVideo(p);
+    };
+  }
+  if (Api.sendPhoto && !Api._origSendPhoto) {
+    Api._origSendPhoto = Api.sendPhoto;
+    Api.sendPhoto = function(p) {
+      if (p && p.reply_markup) {
+        _enforcePrimaryStyle(p.reply_markup);
+      }
+      return Api._origSendPhoto(p);
+    };
+  }
+  if (Api.copyMessage && !Api._origCopyMessage) {
+    Api._origCopyMessage = Api.copyMessage;
+    Api.copyMessage = function(p) {
+      if (p && p.reply_markup) {
+        _enforcePrimaryStyle(p.reply_markup);
+      }
+      return Api._origCopyMessage(p);
+    };
+  }
+}
+
+if (typeof Bot !== "undefined") {
+  if (Bot.sendInlineKeyboard && !Bot._origSendInlineKeyboard) {
+    Bot._origSendInlineKeyboard = Bot.sendInlineKeyboard;
+    Bot.sendInlineKeyboard = function(buttons, text, extra) {
+      let tgInline = [];
+      if (Array.isArray(buttons)) {
+        for (let r = 0; r < buttons.length; r++) {
+          let row = buttons[r];
+          let tgRow = [];
+          if (Array.isArray(row)) {
+            for (let b = 0; b < row.length; b++) {
+              let btn = row[b];
+              if (!btn) continue;
+              let tgBtn = {
+                text: btn.title || btn.text || "",
+                style: btn.style || "primary"
+              };
+              if (btn.url) {
+                tgBtn.url = btn.url;
+              } else if (btn.command) {
+                tgBtn.callback_data = btn.command;
+              } else if (btn.callback_data) {
+                tgBtn.callback_data = btn.callback_data;
+              }
+              tgRow.push(tgBtn);
+            }
+          }
+          if (tgRow.length > 0) {
+            tgInline.push(tgRow);
+          }
+        }
+      }
+
+      let targetChat = (chat && chat.chatid) ? chat.chatid : (user ? user.telegramid : null);
+      if (targetChat && typeof Api !== "undefined" && Api.sendMessage) {
+        return Api.sendMessage({
+          chat_id: targetChat,
+          text: text,
+          parse_mode: (extra && extra.parse_mode) ? extra.parse_mode : "Markdown",
+          reply_markup: {
+            inline_keyboard: tgInline
+          }
+        });
+      } else {
+        return Bot._origSendInlineKeyboard.call(Bot, buttons, text, extra);
+      }
+    };
+  }
+}
+
 if (user) {
   // 1. Check if user is banned
   let isBanned = Bot.getProperty("banned_" + user.telegramid);
@@ -234,8 +343,8 @@ if (user) {
             reply_markup: {
               inline_keyboard: [
                 [
-                  { text: "✅ Approve (+" + newPayment.points + " pts)", callback_data: "/admin_approve_pay " + newPayment.order_id },
-                  { text: "❌ Reject", callback_data: "/admin_reject_pay " + newPayment.order_id }
+                  { text: "✅ Approve (+" + newPayment.points + " pts)", callback_data: "/admin_approve_pay " + newPayment.order_id, style: "primary" },
+                  { text: "❌ Reject", callback_data: "/admin_reject_pay " + newPayment.order_id, style: "primary" }
                 ]
               ]
             }
@@ -320,10 +429,10 @@ if (user) {
               let link = ch.invite_link || (ch.username ? "https://t.me/" + ch.username.replace("@", "") : "");
               if (link) {
                 // Button title is ONLY the channel name!
-                buttons.push([{ title: cleanName, url: link }]);
+                buttons.push([{ title: cleanName, url: link, style: "primary" }]);
               }
             }
-            buttons.push([{ title: "🔄 Verify Membership", command: "/verify_step 0" }]);
+            buttons.push([{ title: "🔄 Verify Membership", command: "/verify_step 0", style: "primary" }]);
 
             let joinText =
               "⚠️ *Membership Required to Access Bot!*\n" +

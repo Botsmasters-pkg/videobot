@@ -49,14 +49,14 @@ let text =
 
 let buttons = [
   [
-    { title: "🎁 Refer & Earn", command: "/referral" },
-    { title: "💳 Buy Points", command: "/buy_points" }
+    { title: "🎁 Refer & Earn", command: "/referral", style: "primary" },
+    { title: "💳 Buy Points", command: "/buy_points", style: "primary" }
   ],
   [
-    { title: "🎬 Get Video", command: "/get_video" },
-    { title: "🔄 Refresh", command: "/my_points" }
+    { title: "🎬 Get Video", command: "/get_video", style: "primary" },
+    { title: "🔄 Refresh", command: "/my_points", style: "primary" }
   ],
-  [{ title: "🏠 Main Menu", command: "/start" }]
+  [{ title: "🏠 Main Menu", command: "/start", style: "primary" }]
 ];
 
 Bot.sendInlineKeyboard(buttons, text);

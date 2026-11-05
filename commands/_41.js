@@ -108,7 +108,8 @@ Api.sendMessage({
   parse_mode: "HTML",
   reply_markup: {
     inline_keyboard: [[
-      { text: "✉️ Direct Message User", url: uDirectUrl }
+      { text: "✉️ Direct Message User", url: uDirectUrl, style: "primary" }
     ]]
   }
 });
+

@@ -44,16 +44,17 @@ for (let i = 0; i < packages.length; i++) {
   buttons.push([
     {
       title: "💎 ₹" + pkg.amount + " ➔ " + pkg.points + " Points (" + vids + " Videos)",
-      command: "/buy_package " + pkg.id
+      command: "/buy_package " + pkg.id,
+      style: "primary"
     }
   ]);
 }
 
 buttons.push([
-  { title: "🎁 Refer & Earn Free", command: "/referral" },
-  { title: "💰 My Points", command: "/my_points" }
+  { title: "🎁 Refer & Earn Free", command: "/referral", style: "primary" },
+  { title: "💰 My Points", command: "/my_points", style: "primary" }
 ]);
-buttons.push([{ title: "🏠 Main Menu", command: "/start" }]);
+buttons.push([{ title: "🏠 Main Menu", command: "/start", style: "primary" }]);
 
 Bot.sendInlineKeyboard(buttons, text);
 
