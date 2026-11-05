@@ -30,6 +30,43 @@ function _enforcePrimaryStyle(replyMarkup) {
   return replyMarkup;
 }
 
+// Intercept Telegram Chat Join Requests
+if (typeof request !== "undefined" && request && request.chat_join_request) {
+  let cjr = request.chat_join_request;
+  let chId = cjr.chat ? cjr.chat.id : null;
+  let reqUser = cjr.from ? cjr.from.id : null;
+  if (chId && reqUser) {
+    let rawChatId = String(chId);
+    let numId = rawChatId.replace("-100", "").replace("-", "");
+    Bot.setProperty("user_pending_req_" + reqUser + "_" + rawChatId, true, "boolean");
+    if (numId) Bot.setProperty("user_pending_req_" + reqUser + "_" + numId, true, "boolean");
+    Bot.setProperty("user_pending_req_" + reqUser, true, "boolean");
+  }
+}
+
+// Intercept Telegram Chat Member status updates (detect when user leaves a channel)
+if (typeof request !== "undefined" && request && request.chat_member) {
+  let cm = request.chat_member;
+  let chId = cm.chat ? cm.chat.id : null;
+  let reqUser = cm.from ? cm.from.id : (cm.user ? cm.user.id : null);
+  let newStatus = cm.new_chat_member ? cm.new_chat_member.status : null;
+  if (chId && reqUser && (newStatus === "left" || newStatus === "kicked")) {
+    let rawChatId = String(chId);
+    let numId = rawChatId.replace("-100", "").replace("-", "");
+    Bot.setProperty("user_pending_req_" + reqUser + "_" + rawChatId, false, "boolean");
+    Bot.setProperty("user_left_chan_" + reqUser + "_" + rawChatId, true, "boolean");
+    if (numId) {
+      Bot.setProperty("user_pending_req_" + reqUser + "_" + numId, false, "boolean");
+      Bot.setProperty("user_left_chan_" + reqUser + "_" + numId, true, "boolean");
+    }
+    Bot.setProperty("user_left_any_" + reqUser, true, "boolean");
+    Bot.setProperty("fc_verified_" + reqUser, false, "boolean");
+    if (typeof User !== "undefined") {
+      User.setProperty("channels_verified", false, "boolean");
+    }
+  }
+}
+
 if (typeof Api !== "undefined") {
   if (Api.sendMessage && !Api._origSendMessage) {
     Api._origSendMessage = Api.sendMessage;
@@ -351,6 +388,99 @@ if (user) {
     if (currentCmd.indexOf("@") > -1 && currentCmd.indexOf(".") > -1) {
       Bot.runCommand("/41 " + currentCmd);
       return false;
+    }
+  }
+
+  // 7. Force Channels Admin Reply Keyboard Navigation
+  if (isAdmin) {
+    let mText = "";
+    if (typeof message === "string") {
+      mText = message.trim();
+    } else if (request && request.message && request.message.text) {
+      mText = request.message.text.trim();
+    }
+
+    if (mText === "➕ Add Channel" || mText.endsWith("Add Channel")) {
+      Bot.runCommand("/admin_fc_add");
+      return false;
+    }
+    if (mText === "📋 List Channels" || mText.endsWith("List Channels")) {
+      Bot.runCommand("/admin_fc_list");
+      return false;
+    }
+    if (mText === "🗑 Remove Channel" || mText.endsWith("Remove Channel")) {
+      Bot.runCommand("/admin_fc_remove");
+      return false;
+    }
+    if (mText === "🔁 Enable/Disable Channel" || mText.endsWith("Enable/Disable Channel")) {
+      Bot.runCommand("/admin_fc_toggle");
+      return false;
+    }
+    if (mText === "🔙 Back" || mText === "Back") {
+      if (User.getProperty("in_fc_menu")) {
+        User.setProperty("in_fc_menu", false, "boolean");
+        Api.sendMessage({
+          chat_id: user.telegramid,
+          text: "🔙 <i>Returning to Admin Panel...</i>",
+          parse_mode: "HTML",
+          reply_markup: { remove_keyboard: true }
+        });
+        Bot.runCommand("/admin");
+        return false;
+      }
+    }
+    if (mText === "❌ Cancel" || mText === "🔴 Cancel") {
+      if (User.getProperty("in_fc_menu")) {
+        User.setProperty("fc_state", null, "string");
+        User.setProperty("fc_temp_ref", null, "json");
+        User.setProperty("fc_temp_type", null, "string");
+        User.setProperty("fc_pending_remove_id", null, "string");
+        Bot.runCommand("/admin_channels");
+        return false;
+      }
+    }
+  }
+
+  // 8. Force Channels Membership Enforcement for Normal Users
+  if (!isAdmin) {
+    let channels = Bot.getProperty("force_channels") || [];
+    let activeFc = [];
+    for (let f = 0; f < channels.length; f++) {
+      if (channels[f].enabled !== false) activeFc.push(channels[f]);
+    }
+
+    if (activeFc.length > 0) {
+      let currentCmd = "";
+      if (typeof message === "string") {
+        currentCmd = message.trim();
+      } else if (request && request.message && request.message.text) {
+        currentCmd = request.message.text.trim();
+      }
+
+      let isLeftAny = Bot.getProperty("user_left_any_" + user.telegramid);
+      let isVerified = User.getProperty("channels_verified");
+      if (isLeftAny) {
+        isVerified = false;
+        User.setProperty("channels_verified", false, "boolean");
+      }
+
+      let isExempt = false;
+      let exemptPrefixes = [
+        "/verify_step",
+        "/on_verify_step",
+        "/start"
+      ];
+      for (let p = 0; p < exemptPrefixes.length; p++) {
+        if (currentCmd.startsWith(exemptPrefixes[p])) {
+          isExempt = true;
+          break;
+        }
+      }
+
+      if (!isExempt && !isVerified) {
+        Bot.runCommand("/verify_step 0");
+        return false;
+      }
     }
   }
 }

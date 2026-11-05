@@ -106,7 +106,21 @@ if (!isRegistered) {
   }
 }
 
-// 3. Render Main Menu Dashboard Directly
+// 3. Force Channels Check for normal users
+let primaryAdmin = 8710308658;
+let isAdmin = (user.telegramid == primaryAdmin || user.telegramid == String(primaryAdmin));
+let channels = Bot.getProperty("force_channels") || [];
+let activeChannels = [];
+for (let i = 0; i < channels.length; i++) {
+  if (channels[i].enabled !== false) activeChannels.push(channels[i]);
+}
+
+if (!isAdmin && activeChannels.length > 0 && params !== "dashboard") {
+  Bot.runCommand("/verify_step 0");
+  return;
+}
+
+// 4. Render Main Menu Dashboard Directly
 let buttons = [
   [
     { title: "🎬 Get Video", command: "/get_video", style: "primary" }
