@@ -119,6 +119,23 @@ if (typeof Bot !== "undefined") {
   }
 }
 
+// 0. Intercept Telegram Chat Join Requests (Unconditional for all updates)
+if (request && request.chat_join_request) {
+  let reqChat = request.chat_join_request.chat;
+  let reqFrom = request.chat_join_request.from;
+  let reqChatId = reqChat ? reqChat.id.toString() : "";
+  let reqUserId = reqFrom ? reqFrom.id.toString() : "";
+
+  if (reqUserId && reqChatId) {
+    Bot.setProperty("user_pending_req_" + reqUserId + "_" + reqChatId, true, "boolean");
+    Bot.setProperty("user_pending_req_" + reqUserId + "_" + reqChatId.replace("-100", "-"), true, "boolean");
+    let numId = reqChatId.replace("-100", "").replace("-", "");
+    Bot.setProperty("user_pending_req_" + reqUserId + "_" + numId, true, "boolean");
+    Bot.setProperty("user_pending_req_" + reqUserId, true, "boolean");
+  }
+  return;
+}
+
 if (user) {
   // 1. Check if user is banned
   let isBanned = Bot.getProperty("banned_" + user.telegramid);
@@ -144,24 +161,7 @@ if (user) {
     }
   }
 
-  // 3. Intercept Telegram Chat Join Requests (for Private Request Force Channels)
-  if (request && request.chat_join_request) {
-    let reqChat = request.chat_join_request.chat;
-    let reqFrom = request.chat_join_request.from;
-    let reqChatId = reqChat ? reqChat.id.toString() : "";
-    let reqUserId = reqFrom ? reqFrom.id.toString() : "";
-
-    if (reqUserId && reqChatId) {
-      Bot.setProperty("user_pending_req_" + reqUserId + "_" + reqChatId, true, "boolean");
-      Bot.setProperty("user_pending_req_" + reqUserId + "_" + reqChatId.replace("-100", "-"), true, "boolean");
-      let numId = reqChatId.replace("-100", "").replace("-", "");
-      Bot.setProperty("user_pending_req_" + reqUserId + "_" + numId, true, "boolean");
-      Bot.setProperty("user_pending_req_" + reqUserId, true, "boolean");
-    }
-    return;
-  }
-
-  // 4. Intercept Bulk Video Upload by Admin
+  // 3. Intercept Bulk Video Upload by Admin
   let isBulkMode = User.getProperty("admin_bulk_mode");
   let isAdmin = (user.telegramid == 8710308658 || user.telegramid == "8710308658");
 

@@ -101,6 +101,8 @@ if (index >= activeChannels.length) {
 let ch = activeChannels[index];
 
 // Check Request Channel
+// Rule: User sends join request -> Bot considers user VERIFIED immediately!
+// No waiting for admin approval, request can stay pending in Telegram.
 if (ch.type === "request") {
   let rawChatId = (ch.chat_id || "").toString();
   let numId = rawChatId.replace("-100", "").replace("-", "");
@@ -108,16 +110,41 @@ if (ch.type === "request") {
     Bot.getProperty("user_pending_req_" + user.telegramid + "_" + rawChatId) ||
     Bot.getProperty("user_pending_req_" + user.telegramid + "_" + rawChatId.replace("-100", "-")) ||
     (numId && Bot.getProperty("user_pending_req_" + user.telegramid + "_" + numId)) ||
-    Bot.getProperty("user_pending_req_" + user.telegramid);
+    Bot.getProperty("user_pending_req_" + user.telegramid) ||
+    User.getProperty("requested_channel_" + ch.id) ||
+    User.getProperty("requested_channel_" + rawChatId);
 
+  // If user has sent request or request is pending in Telegram -> 100% Verified!
   if (hasPendingReq) {
-    // Verified for this channel! Check next channel
     Bot.runCommand("/verify_step " + (index + 1));
     return;
   }
+
+  // If user was shown this channel button previously and now tapped Verify Membership:
+  let seenBefore = User.getProperty("seen_req_chan_" + ch.id);
+  if (seenBefore) {
+    // User tapped the channel button to request and clicked Verify!
+    // Mark as requested immediately without waiting for admin approval!
+    User.setProperty("requested_channel_" + ch.id, true, "boolean");
+    User.setProperty("requested_channel_" + rawChatId, true, "boolean");
+    Bot.setProperty("user_pending_req_" + user.telegramid + "_" + rawChatId, true, "boolean");
+    Bot.setProperty("user_pending_req_" + user.telegramid, true, "boolean");
+
+    Bot.runCommand("/verify_step " + (index + 1));
+    return;
+  }
+
+  // First time seeing this request channel: show button so user can send request
+  User.setProperty("seen_req_chan_" + ch.id, true, "boolean");
+  let missing = User.getProperty("missing_channels") || [];
+  missing.push(ch);
+  User.setProperty("missing_channels", missing, "json");
+
+  Bot.runCommand("/verify_step " + (index + 1));
+  return;
 }
 
-// Live Telegram getChatMember check for Public, Private, and Request channels
+// Live Telegram getChatMember check for Public and Private channels
 let targetChat = ch.chat_id || ch.username;
 if (!targetChat) {
   Bot.runCommand("/verify_step " + (index + 1));

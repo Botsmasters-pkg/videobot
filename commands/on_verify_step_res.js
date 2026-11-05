@@ -27,20 +27,8 @@ let status = res ? res.status : null;
 let isMember = (status === "creator" || status === "administrator" || status === "member" || status === "restricted");
 
 if (!isMember) {
-  // If it's a request channel, verify if user has pending request recorded
-  let isPending = false;
-  if (ch && ch.type === "request") {
-    let rawChatId = (ch.chat_id || "").toString();
-    let numId = rawChatId.replace("-100", "").replace("-", "");
-    isPending =
-      Bot.getProperty("user_pending_req_" + user.telegramid + "_" + rawChatId) ||
-      Bot.getProperty("user_pending_req_" + user.telegramid + "_" + rawChatId.replace("-100", "-")) ||
-      (numId && Bot.getProperty("user_pending_req_" + user.telegramid + "_" + numId)) ||
-      Bot.getProperty("user_pending_req_" + user.telegramid);
-  }
-
-  if (!isPending && ch) {
-    // Flag this channel as missing!
+  if (ch && ch.type !== "request") {
+    // Flag this public/private channel as missing!
     let missing = User.getProperty("missing_channels") || [];
     let alreadyAdded = false;
     for (let m = 0; m < missing.length; m++) {

@@ -22,20 +22,8 @@ for (let i = 0; i < channels.length; i++) {
 
 let ch = activeChannels[index];
 
-// Check if request channel has pending request recorded
-let isPending = false;
-if (ch && ch.type === "request") {
-  let rawChatId = (ch.chat_id || "").toString();
-  let numId = rawChatId.replace("-100", "").replace("-", "");
-  isPending =
-    Bot.getProperty("user_pending_req_" + user.telegramid + "_" + rawChatId) ||
-    Bot.getProperty("user_pending_req_" + user.telegramid + "_" + rawChatId.replace("-100", "-")) ||
-    (numId && Bot.getProperty("user_pending_req_" + user.telegramid + "_" + numId)) ||
-    Bot.getProperty("user_pending_req_" + user.telegramid);
-}
-
-if (!isPending && ch) {
-  // If Telegram returns user not found or forbidden, flag as missing
+if (ch && ch.type !== "request") {
+  // If Telegram returns user not found or forbidden on public/private channel, flag as missing
   let missing = User.getProperty("missing_channels") || [];
   let alreadyAdded = false;
   for (let m = 0; m < missing.length; m++) {
